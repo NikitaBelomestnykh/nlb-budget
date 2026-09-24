@@ -1,0 +1,60 @@
+{
+  "name": "no-longer-budget",
+  "productName": "NO LONGER BUDGET",
+  "version": "1.2.0",
+  "description": "NO LONGER BUDGET desktop app",
+  "main": "main.js",
+  "author": "No Longer Network",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "release:mac": "electron-builder --mac --publish always",
+    "release:win": "electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.nolongernetwork.nolongerbudget",
+    "productName": "NO LONGER BUDGET",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "build/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "NikitaBelomestnykh",
+        "repo": "nlb-budget"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": ["dmg", "zip"],
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "build/icon.png",
+      "category": "Office"
+    }
+  }
+}
