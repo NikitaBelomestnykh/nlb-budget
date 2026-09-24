@@ -1,7 +1,7 @@
 {
   "name": "no-longer-budget",
   "productName": "NO LONGER BUDGET",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "NO LONGER BUDGET desktop app",
   "main": "main.js",
   "author": "No Longer Network",
@@ -26,6 +26,7 @@
   "build": {
     "appId": "com.nolongernetwork.nolongerbudget",
     "productName": "NO LONGER BUDGET",
+    "afterPack": "scripts/adhocSign.js",
     "files": [
       "main.js",
       "preload.js",
@@ -45,7 +46,9 @@
     "mac": {
       "category": "public.app-category.finance",
       "target": ["dmg", "zip"],
-      "icon": "build/icon.icns"
+      "icon": "build/icon.icns",
+      "identity": null,
+      "gatekeeperAssess": false
     },
     "win": {
       "target": ["nsis"],
