@@ -1,1 +1,60 @@
-ewogICJuYW1lIjogIm5vLWxvbmdlci1idWRnZXQiLAogICJwcm9kdWN0TmFtZSI6ICJOTyBMT05HRVIgQlVER0VUIiwKICAidmVyc2lvbiI6ICIxLjMuMCIsCiAgImRlc2NyaXB0aW9uIjogIk5PIExPTkdFUiBCVURHRVQgZGVza3RvcCBhcHAiLAogICJtYWluIjogIm1haW4uanMiLAogICJhdXRob3IiOiAiTm8gTG9uZ2VyIE5ldHdvcmsiLAogICJsaWNlbnNlIjogIlVOTElDRU5TRUQiLAogICJwcml2YXRlIjogdHJ1ZSwKICAic2NyaXB0cyI6IHsKICAgICJzdGFydCI6ICJlbGVjdHJvbiAuIiwKICAgICJkaXN0IjogImVsZWN0cm9uLWJ1aWxkZXIiLAogICAgImRpc3Q6bWFjIjogImVsZWN0cm9uLWJ1aWxkZXIgLS1tYWMiLAogICAgImRpc3Q6d2luIjogImVsZWN0cm9uLWJ1aWxkZXIgLS13aW4iLAogICAgImRpc3Q6bGludXgiOiAiZWxlY3Ryb24tYnVpbGRlciAtLWxpbnV4IiwKICAgICJyZWxlYXNlOm1hYyI6ICJlbGVjdHJvbi1idWlsZGVyIC0tbWFjIC0tcHVibGlzaCBhbHdheXMiLAogICAgInJlbGVhc2U6d2luIjogImVsZWN0cm9uLWJ1aWxkZXIgLS13aW4gLS1wdWJsaXNoIGFsd2F5cyIKICB9LAogICJkZXBlbmRlbmNpZXMiOiB7CiAgICAiZWxlY3Ryb24tdXBkYXRlciI6ICJeNi4zLjAiCiAgfSwKICAiZGV2RGVwZW5kZW5jaWVzIjogewogICAgImVsZWN0cm9uIjogIl4zMi4wLjAiLAogICAgImVsZWN0cm9uLWJ1aWxkZXIiOiAiXjI1LjAuMCIKICB9LAogICJidWlsZCI6IHsKICAgICJhcHBJZCI6ICJjb20ubm9sb25nZXJuZXR3b3JrLm5vbG9uZ2VyYnVkZ2V0IiwKICAgICJwcm9kdWN0TmFtZSI6ICJOTyBMT05HRVIgQlVER0VUIiwKICAgICJmaWxlcyI6IFsKICAgICAgIm1haW4uanMiLAogICAgICAicHJlbG9hZC5qcyIsCiAgICAgICJpbmRleC5odG1sIiwKICAgICAgImJ1aWxkLyoqLyoiCiAgICBdLAogICAgImRpcmVjdG9yaWVzIjogewogICAgICAib3V0cHV0IjogInJlbGVhc2UiCiAgICB9LAogICAgInB1Ymxpc2giOiBbCiAgICAgIHsKICAgICAgICAicHJvdmlkZXIiOiAiZ2l0aHViIiwKICAgICAgICAib3duZXIiOiAiTmlraXRhQmVsb21lc3RueWtoIiwKICAgICAgICAicmVwbyI6ICJubGItYnVkZ2V0IgogICAgICB9CiAgICBdLAogICAgIm1hYyI6IHsKICAgICAgImNhdGVnb3J5IjogInB1YmxpYy5hcHAtY2F0ZWdvcnkuZmluYW5jZSIsCiAgICAgICJ0YXJnZXQiOiBbImRtZyIsICJ6aXAiXSwKICAgICAgImljb24iOiAiYnVpbGQvaWNvbi5pY25zIgogICAgfSwKICAgICJ3aW4iOiB7CiAgICAgICJ0YXJnZXQiOiBbIm5zaXMiXSwKICAgICAgImljb24iOiAiYnVpbGQvaWNvbi5pY28iCiAgICB9LAogICAgImxpbnV4IjogewogICAgICAidGFyZ2V0IjogWyJBcHBJbWFnZSJdLAogICAgICAiaWNvbiI6ICJidWlsZC9pY29uLnBuZyIsCiAgICAgICJjYXRlZ29yeSI6ICJPZmZpY2UiCiAgICB9CiAgfQp9Cg==
+{
+  "name": "no-longer-budget",
+  "productName": "NO LONGER BUDGET",
+  "version": "1.3.0",
+  "description": "NO LONGER BUDGET desktop app",
+  "main": "main.js",
+  "author": "No Longer Network",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "release:mac": "electron-builder --mac --publish always",
+    "release:win": "electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.nolongernetwork.nolongerbudget",
+    "productName": "NO LONGER BUDGET",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "build/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "NikitaBelomestnykh",
+        "repo": "nlb-budget"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": ["dmg", "zip"],
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "build/icon.png",
+      "category": "Office"
+    }
+  }
+}
