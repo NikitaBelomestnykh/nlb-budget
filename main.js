@@ -4,80 +4,112 @@ const { autoUpdater } = require('electron-updater')
 
 let mainWindow = null
 let manualUpdateCheck = false
+let updateCheckInProgress = false
+let updateGuideOpen = false
+const releasesUrl = 'https://github.com/NikitaBelomestnykh/nlb-budget/releases/latest'
 
 function send(win, action) {
   if (win && win.webContents) win.webContents.send('menu-action', action)
 }
 
-autoUpdater.autoDownload = true
-autoUpdater.autoInstallOnAppQuit = true
+// Until Developer ID signing is configured, use the updater only to discover
+// releases. Never download through Squirrel.Mac or install on quit.
+autoUpdater.autoDownload = false
+autoUpdater.autoInstallOnAppQuit = false
 
-function checkForUpdates(manual) {
-  if (!app.isPackaged) {
-    if (manual) {
-      dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        message: 'Update checks only run in the installed app, not during development.',
-      })
-    }
-    return
-  }
-  manualUpdateCheck = manual
-  autoUpdater.checkForUpdates().catch((err) => {
-    if (manualUpdateCheck) {
-      dialog.showMessageBox(mainWindow, {
-        type: 'error',
-        message: 'Update check failed',
-        detail: String((err && err.message) || err),
-      })
-    }
-    manualUpdateCheck = false
+function showUpdateError(err) {
+  console.error('Update error:', err)
+  return dialog.showMessageBox(mainWindow, {
+    type: 'error',
+    message: 'Could not check for or open the update',
+    detail: String((err && err.message) || err) + '\n\nYou can download releases at: ' + releasesUrl,
   })
 }
 
+async function showManualUpdateGuide(version) {
+  if (updateGuideOpen) return
+  updateGuideOpen = true
+  const validVersion = typeof version === 'string' && /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version)
+  const downloadPage = validVersion
+    ? 'https://github.com/NikitaBelomestnykh/nlb-budget/releases/tag/v' + encodeURIComponent(version)
+    : releasesUrl
+  try {
+    const { response } = await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update NO LONGER BUDGET',
+      message: validVersion ? `NO LONGER BUDGET ${version} is available` : 'How to update NO LONGER BUDGET',
+      detail: [
+        'Updates are installed manually for now. Nothing will download or restart automatically.',
+        '',
+        '1. Back up each important budget: Export & Share → Export .nlb.',
+        '2. Click Open Download Page below. Under Assets, download the arm64.dmg installer (Apple Silicon Macs only).',
+        '3. When the download finishes, quit NO LONGER BUDGET with Cmd+Q.',
+        '4. Open the .dmg, drag NO LONGER BUDGET into Applications, and choose Replace. Do not delete the app’s data or use an uninstaller.',
+        '5. Reopen the app from Applications and check the version and your budgets.',
+        '',
+        'If macOS blocks opening this beta: cancel the warning, then use System Settings → Privacy & Security → Open Anyway for NO LONGER BUDGET, if offered. Do not disable macOS security.',
+        '',
+        'You can reopen these instructions from the app menu → How to Update…',
+      ].join('\n'),
+      buttons: ['Open Download Page', 'Later'],
+      defaultId: 0,
+      cancelId: 1,
+    })
+    if (response === 0) await shell.openExternal(downloadPage)
+  } catch (err) {
+    await showUpdateError(err)
+  } finally {
+    updateGuideOpen = false
+  }
+}
+
+async function checkForUpdates(manual) {
+  if (!app.isPackaged) {
+    if (manual) await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      message: 'Update checks only run in the installed app, not during development.',
+    })
+    return
+  }
+  if (updateCheckInProgress) return
+  updateCheckInProgress = true
+  manualUpdateCheck = manual
+  try {
+    await autoUpdater.checkForUpdates()
+  } catch (err) {
+    // The error event normally handles this; the flag prevents duplicate dialogs.
+    if (manualUpdateCheck) {
+      manualUpdateCheck = false
+      await showUpdateError(err)
+    }
+  } finally {
+    updateCheckInProgress = false
+    manualUpdateCheck = false
+  }
+}
+
 autoUpdater.on('update-available', (info) => {
-  dialog.showMessageBox(mainWindow, {
-    type: 'info',
-    message: `Version ${info.version} is downloading in the background.`,
-    detail: "You'll be prompted to restart once it's ready to install.",
-    buttons: ['OK'],
-  })
+  manualUpdateCheck = false
+  void showManualUpdateGuide(info.version)
 })
 
 autoUpdater.on('update-not-available', () => {
   if (manualUpdateCheck) {
-    dialog.showMessageBox(mainWindow, {
+    void dialog.showMessageBox(mainWindow, {
       type: 'info',
       message: "You're on the latest version.",
+      detail: `Installed version: ${app.getVersion()}`,
     })
   }
   manualUpdateCheck = false
 })
 
 autoUpdater.on('error', (err) => {
+  console.error('Update check failed:', err)
   if (manualUpdateCheck) {
-    dialog.showMessageBox(mainWindow, {
-      type: 'error',
-      message: 'Update check failed',
-      detail: String((err && err.message) || err),
-    })
+    manualUpdateCheck = false
+    void showUpdateError(err)
   }
-  manualUpdateCheck = false
-})
-
-autoUpdater.on('update-downloaded', (info) => {
-  dialog
-    .showMessageBox(mainWindow, {
-      type: 'info',
-      message: `Version ${info.version} has been downloaded.`,
-      detail: 'Restart now to install it, or it will install automatically the next time you quit the app.',
-      buttons: ['Restart Now', 'Later'],
-      defaultId: 0,
-      cancelId: 1,
-    })
-    .then(({ response }) => {
-      if (response === 0) autoUpdater.quitAndInstall()
-    })
 })
 
 function buildMenu(win) {
@@ -92,6 +124,7 @@ function buildMenu(win) {
               { role: 'about' },
               { type: 'separator' },
               { label: 'Check for Updates\u2026', click: () => checkForUpdates(true) },
+              { label: 'How to Update\u2026', click: () => showManualUpdateGuide() },
               { type: 'separator' },
               { role: 'services' },
               { type: 'separator' },
@@ -148,7 +181,10 @@ function buildMenu(win) {
       ? [
           {
             label: 'Help',
-            submenu: [{ label: 'Check for Updates\u2026', click: () => checkForUpdates(true) }],
+            submenu: [
+              { label: 'Check for Updates\u2026', click: () => checkForUpdates(true) },
+              { label: 'How to Update\u2026', click: () => showManualUpdateGuide() },
+            ],
           },
         ]
       : []),
