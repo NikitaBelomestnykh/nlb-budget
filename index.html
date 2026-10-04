@@ -732,7 +732,11 @@
   .side-panel .manager-table { width: 100%; min-width: 0; table-layout: fixed; }
   .side-panel .manager-table .col-name { width: auto; }
   #globals-panel .manager-table .col-name { width: 42%; }
-  #fringes-panel .manager-table .col-unit { width: 104px; }
+  #fringes-panel .manager-table .col-unit { width: 132px; }
+  .side-panel .manager-table input, .side-panel .manager-table select { box-sizing: border-box; min-width: 0; max-width: 100%; }
+  #fringes-panel .fringe-type { display: block; width: 100%; }
+  #fringes-panel .money.percent .dollar { left: auto; right: 8px; }
+  #fringes-panel .money.percent input { padding-left: 8px; padding-right: 22px; text-align: right; }
   #groups-panel .manager-table .col-unit { width: 110px; }
   .side-panel .manager-table .col-rm { width: 34px; }
   .side-panel .manager-table th.col-uses, .side-panel .manager-table td.col-uses { width: 64px; min-width: 64px; }
@@ -892,7 +896,7 @@
   "use strict";
 
   var STORE_KEY = "no-longer-budget-v9";
-  var APP_VERSION = "1.5.2"; // Semantic version: +0.0.1 bug fixes, +0.1.0 new features, +1.0.0 major releases. Bump with each change and log it in the Build Log.
+  var APP_VERSION = "1.5.3"; // Semantic version: +0.0.1 bug fixes, +0.1.0 new features, +1.0.0 major releases. Bump with each change and log it in the Build Log.
   var GROUPS = [
     { value: "ATL", label: "ATL" },
     { value: "BT", label: "BTL" },
@@ -3554,116 +3558,71 @@
   }
 
   var HELP_SECTIONS = [
-    {
-      title: "Budgets & versions",
-      body: "<p>Every budget lives in the left sidebar. Use <b>+ New Budget</b> at the bottom of the sidebar to start one from scratch or from a template.</p>" +
-        "<ul>" +
-        "<li><b>Snapshot (the &#10697; icon)</b> duplicates the current budget as a new dated version &mdash; use this before making big changes so you always have a fallback copy.</li>" +
-        "<li><b>Rename (pencil icon)</b> renames a budget in the sidebar.</li>" +
-        "<li><b>Delete (&times;)</b> permanently removes a budget entry.</li>" +
-        "<li>Click any budget's name in the sidebar to switch to it.</li>" +
-        (isElectron
-          ? "<li>Changes save automatically to this budget's .nlb file on disk — there's no separate save step for everyday edits.</li>"
-          : "<li>Everything is saved automatically to this browser (no account or internet connection needed).</li>") +
-        "</ul>"
-    },
-    {
-      title: "Getting around: Sheet, Accounts & Sub-accounts",
-      body: "<p>Budgets are organized in three levels:</p>" +
-        "<ul>" +
-        "<li><b>Top Sheet</b> &mdash; the summary view of every account, grouped by ATL / BTL / BTL POST / OTHER.</li>" +
-        "<li><b>Account</b> &mdash; click an account from the Top Sheet to see its sub-accounts and their totals.</li>" +
-        "<li><b>Sub-account (Detail)</b> &mdash; click a sub-account to see and edit its individual budget lines.</li>" +
-        "</ul>" +
-        "<p>Use the breadcrumbs at the top to jump back up a level, or the &#8593;/&#8595; arrows next to the title to move to the previous/next account or sub-account without going back to the Top Sheet.</p>"
-    },
-    {
-      title: "Lines, subtotals & notes",
-      body: "<p>Inside a sub-account, click <b>+ Add line</b> for a new budget line, or <b>+ Add subtotal</b> to insert a running subtotal break (useful for separating shoot days, phases, etc.).</p>" +
-        "<ul>" +
-        "<li>Each line has QTY, UNIT, X (a second multiplier), and RATE columns &mdash; the Total is calculated automatically.</li>" +
-        "<li>Click the notes icon on a line to attach a free-text note; it appears as an extra row under the line.</li>" +
-        "<li>Drag a line by its handle (left edge) to reorder lines within a sub-account.</li>" +
-        "<li>Use the kebab / drag-handle menu on a line to apply Fringes or Groups to that single line, or to delete it.</li>" +
-        "</ul>"
-    },
-    {
-      title: "Fringes",
-      body: "<p>Fringes are automatic add-on costs (payroll tax, benefits, etc.) calculated from a line's amount. Manage them from the <b>Fringes</b> button in the toolbar.</p>" +
-        "<ul>" +
-        "<li>Create a fringe with a name and a rate (percentage).</li>" +
-        "<li>Apply a fringe to a single line from its row menu, or click the &#8942; icon in a detail table's header to apply/remove a fringe across all or selected lines at once (bulk apply).</li>" +
-        "<li>Applied fringes show as their own line under the lines they apply to, and roll into subtotal and account totals.</li>" +
-        "</ul>"
-    },
-    {
-      title: "Groups",
-      body: "<p>Groups are color-coded tags you can apply to lines (e.g. by department, location, or vendor) to visually organize and total related costs. Manage them from the <b>Groups</b> button in the toolbar &mdash; give each group a name and a color, then apply it to lines the same way you apply Fringes (row menu or the header &#8942; bulk menu).</p>"
-    },
-    {
-      title: "Globals",
-      body: "<p>Globals (in the <b>Globals</b> panel) are named values you can reuse across the whole budget &mdash; for example a \"Day Rate\" or a formula like <code>Day Rate * 5</code> that references another global by name.</p>" +
-        "<p>Link any detail line's Rate field to a global using the chain icon next to it. When you update the global's value later, every linked line updates automatically. The Uses column shows how many lines currently reference each global.</p>"
-    },
-    {
-      title: "Units",
-      body: "<p>Units (in the <b>Units</b> panel) are the custom labels available in a line's UNIT dropdown (e.g. \"Day\", \"Week\", \"Flat\"). Add, rename, or set the plural form of a unit here; new units immediately show up in every line's unit picker.</p>"
-    },
-    {
-      title: "Actuals, Variance & Locking",
-      body: "<p><b>Show Actuals</b> (toolbar) reveals Actual, Variance, and Est. Final columns everywhere, so you can track real spend against the budgeted amount as a project moves forward.</p>" +
-        "<ul>" +
-        "<li><b>Lock Budget</b> freezes the current numbers as the \"original\" for comparison &mdash; once locked, editing amounts shows how far you've drifted from the locked baseline.</li>" +
-        "<li><b>Re-lock Original / Unlock</b> lets you unlock to make baseline corrections, or re-lock once you're done.</li>" +
-        "</ul>"
-    },
-    {
-      title: "Currency",
-      body: "<p>The currency selector in the toolbar changes the symbol used everywhere in the current budget (USD, GBP, EUR, JPY, CAD, AUD). This is a per-budget setting.</p>"
-    },
-    {
-      title: "Find",
-      body: "<p>Click <b>Find</b> in the toolbar to search descriptions and account/sub-account names across the whole active budget. Click a result to jump straight to it.</p>"
-    },
-    {
-      title: "Export (PDF, CSV, Excel, .nlb backup)",
-      body: "<p>Open <b>Export</b> in the toolbar to choose exactly what to include (top sheet, account/line detail, notes, fringes, contingency, globals/units/groups lists) and PDF layout options (orientation, color/black & white, text size, page numbers, title page, company name).</p>" +
-        "<ul>" +
-        "<li><b>Export PDF</b> &mdash; a formatted, printable budget document.</li>" +
-        "<li><b>Export CSV</b> &mdash; a spreadsheet-friendly row export.</li>" +
-        "<li><b>Export Excel</b> &mdash; a formatted spreadsheet file.</li>" +
-        "<li><b>Export .nlb</b> &mdash; a full, lossless backup of the budget (everything, including fringes/groups/globals/units and lock state) that can be re-imported later.</li>" +
-        "</ul>" +
-        "<p>Export preferences are remembered per budget.</p>"
-    },
-    {
-      title: "Import a budget",
-      body: "<p>Open <b>Import</b> in the toolbar. There are three ways to bring in a budget as a new entry in your sidebar:</p>" +
-        "<ul>" +
-        "<li><b>.nlb backup</b> &mdash; restores a full backup previously exported from this app, exactly as it was.</li>" +
-        "<li><b>Spreadsheet (.csv)</b> &mdash; builds a new budget from a CSV using Group, Account #, Account Name, Sub #, Sub Name, Description, Qty, Unit, X, Rate columns (matches this app's own CSV export layout).</li>" +
-        "<li><b>Movie Magic Budgeting (.xml)</b> &mdash; imports a real Movie Magic XML export. You'll get a review screen first to confirm each category's ATL/BTL/BTL Post group, the Contingency percent, and to name any fringe/group/global codes found before the import is finalized.</li>" +
-        "</ul>"
-    },
-    {
-      title: "Templates",
-      body: "<p>When creating a new budget, you can start from a chart-of-accounts template instead of a blank sheet &mdash; pick one from the template list and edit anything afterward.</p>"
-    },
-    {
-      title: "Files & storage",
-      body: (isElectron
-        ? "<p>Every budget is its own <b>.nlb</b> file on disk, organized into real folders inside <code>Documents/NO LONGER BUDGET</code>. Use <b>File → Show All Budgets…</b> to browse, search, and filter every budget file across all folders.</p>" +
-          "<ul>" +
-          "<li><b>⌘S Save</b> writes the current budget to its file; changes also autosave a moment after you stop typing, and the title bar shows “Unsaved Changes” until that finishes.</li>" +
-          "<li><b>⌘⇧S Save As…</b> writes the current budget to a new file, leaving the original untouched.</li>" +
-          "<li><b>⌘O Open…</b> or <b>File → Open Recent</b> opens any existing .nlb file.</li>" +
-          "<li><b>⌘⇧N New Budget File…</b> opens the launcher to create a brand-new budget in any folder; <b>⌘N New Budget</b> creates one alongside the currently open file.</li>" +
-          "<li>Closing a window with unsaved changes prompts you to Save, Don't Save, or Cancel.</li>" +
-          "</ul>"
-        : "<p>On supported browsers, an <b>Install App</b> button appears in the toolbar so you can install NO LONGER BUDGET like a native app (works offline, opens in its own window). Everything is saved to this browser's local storage.</p>") +
-        "<p>On phones/small screens, side panels expand to full width and detail tables scroll horizontally &mdash; swipe sideways on a table to see columns that don't fit.</p>"
-    }
-  ];
+  {
+    "title": "Start, switch & organize budgets",
+    "body": "<p>Click <b>+ New Budget</b> near the top of the left sidebar, enter a title, and save the dialog. New budgets start blank; the template picker is not currently enabled. Click a budget name in the sidebar to select it. The selected title appears in the toolbar between <b>Show Actuals</b> and <b>Export &amp; Share</b>.</p><p>The <b>pencil beside a budget</b> opens its options: <b>Rename, Duplicate, Move to Folder, Delete</b>. Duplicate makes a separate version (for example “Budget v2”) and clears its lock baseline; it is not an external backup. The folder-plus icon beside BUDGETS creates an in-app folder. Move budgets through their pencil menu; folders are organizational labels, not disk directories.</p>"
+  },
+  {
+    "title": "Top Sheet → Account → Sub-account",
+    "body": "<p>The <b>Top Sheet</b> summarizes accounts under ATL, BTL, BTL POST, and OTHER. Click an account description to open its sub-accounts, then click a sub-account description to edit its detail lines.</p><p>Use breadcrumbs or the back arrow to return up a level. The up/down arrows beside an account or sub-account title go to the previous/next item. Click a number or name to edit it. Use <b>+ Add account</b>, <b>+ Add sub-account</b>, and <b>+ Add line</b> at the appropriate level. The bottom footer keeps category totals and Grand Total visible.</p>"
+  },
+  {
+    "title": "Edit lines, formulas & expanded fields",
+    "body": "<p>A detail line’s base cost is <b>QTY × X × RATE</b>. UNIT is a label, not an additional multiplier. Numeric fields accept expressions such as <code>85*3</code>; click away to commit. <b>Tab / Shift+Tab</b> move right/left across editable detail fields; <b>Enter / Shift+Enter</b> move down/up within the same field.</p><p>If your typed text is wider than a field, an expanded editor opens below the row while that field is selected. Moving to another cell collapses it back to its displayed value. Click back in to see and edit the original text or global expression. UNIT widths adapt to their displayed values; narrow windows may require horizontal table scrolling.</p>"
+  },
+  {
+    "title": "Reorder & renumber",
+    "body": "<p>Drag the handle at a row’s left edge to reorder Top Sheet accounts, sub-accounts, detail lines, and subtotal rows. Accounts stay within their existing Top Sheet category; sub-accounts stay under their account; detail rows stay in their sub-account. Dragging does not move items between parents.</p><p>Click the <b># column heading</b> and choose <b>Renumber</b>. Top Sheet accounts renumber in their current order by hundreds within that category, starting from the first account’s hundred (or the category default). Sub-accounts start at their parent account number + 1 and increment by one. Confirm the proposed range. Nested lists are not automatically renumbered. Use <b>Cmd/Ctrl+Z</b> to undo.</p>"
+  },
+  {
+    "title": "Subtotals & notes",
+    "body": "<p><b>+ Add subtotal</b> inserts a running subtotal that sums the segment since the previous subtotal, or the start of the list. Applied fringes are included in rollups and shown in separate fringe breakdown rows.</p><p>Click a line’s circular <b>notes icon</b> to open a note row underneath it. The icon highlights when a note exists. Click it again to collapse the note. Opening notes does not resize the other columns.</p>"
+  },
+  {
+    "title": "Setup & Units",
+    "body": "<p><b>Setup</b> in the toolbar opens <b>Globals, Units, Fringes, Groups</b>, and the budget’s <b>Currency</b> selector. Each manager opens in a right-hand panel; close it with × or the backdrop.</p><p>In <b>Setup → Units</b>, add or edit a unit’s singular Name and Plural. Choose a unit through a detail line’s UNIT picker, or type it. Recognized units display singular only when QTY is exactly 1; zero, decimals, and other quantities use the plural. Clicking the cell restores the original editable text.</p><p>Currency changes the budget’s display symbol; it does <b>not</b> convert amounts using exchange rates.</p>"
+  },
+  {
+    "title": "Globals: reusable values & live expressions",
+    "body": "<p>Open <b>Setup → Globals</b> and add a named number, text value, or expression using other global names (for example <code>Day Rate * 5</code>). Type a global’s name directly in a detail line’s Description, QTY, UNIT, X, or RATE; autocomplete helps insert it. There is no chain-link button to use.</p><p>When you leave the field, it displays the resolved value. Selecting it again restores your original expression. Changing a global updates its references throughout the budget. The <b>Uses</b> count tracks name occurrences in detail fields and other globals, not just the number of lines.</p>"
+  },
+  {
+    "title": "Fringes: define & apply costs",
+    "body": "<p>Open <b>Setup → Fringes</b>, then <b>+ Add fringe</b>. Set its Name, Type, and Rate. <b>% of wages</b> applies a percentage to each assigned line’s base amount; enter <b>21.5</b> for 21.5%, not 0.215. <b>Flat per line</b> adds that currency amount once to each assigned detail line, not once per unit. The <b>$ Total</b> and <b>Uses</b> columns show the budgeted fringe cost and number of assigned lines.</p><p>For one line, click its drag-handle menu → <b>Apply fringes</b> and toggle the fringe checklist. For bulk assignment, click the <b>three-dot menu in the detail table header</b> → <b>Fringes</b>, choose fringes, then <b>Apply to all lines</b> or <b>Select lines to apply to…</b>. In selection mode, check the desired rows and click <b>Apply to selected</b>; use Select all or Cancel as needed. Use a row’s checklist to remove a fringe from that line.</p><p>Fringes belong to detail lines, not directly to accounts. They roll up into sub-account, account, category, and Grand Total amounts. Breakdown rows are informational: do not add them again to those totals. Click × in the manager to delete a definition after confirmation.</p>"
+  },
+  {
+    "title": "Groups: line tags & totals",
+    "body": "<p>Open <b>Setup → Groups</b>; add a group and pick its color. Apply it to detail lines from the row menu → <b>Apply groups</b>, or the detail header’s three-dot menu → <b>Groups</b> using all-lines or checked-lines selection.</p><p>The colored bar beside a line’s description shows its groups; click it to reopen the checklist. Groups tag lines, not accounts. <b>$ Total</b> sums the base costs of tagged lines and <b>Uses</b> counts them. A line can be in multiple groups, so adding group totals together may double-count the same line.</p>"
+  },
+  {
+    "title": "Delete one, all, or selected rows",
+    "body": "<p>Click a row’s drag-handle menu → <b>Delete this line</b> to delete that account, sub-account, detail line, or subtotal. Deleting an account also deletes its sub-accounts and lines; deleting a sub-account deletes its lines.</p><p>The table header’s <b>three-dot menu → Delete</b> offers <b>Delete all in this list…</b> and <b>Select rows to delete…</b>. Select rows with checkboxes and click <b>Delete selected</b>. “All” applies only to the current category or parent list, not every budget.</p><p>When a confirmation appears, <b>Enter confirms</b> and <b>Escape cancels</b>. A completely empty detail line can be deleted without a prompt. <b>Cmd/Ctrl+Z</b> undoes deletions; export a backup before large destructive changes.</p>"
+  },
+  {
+    "title": "Actuals, Hot Cost & variance",
+    "body": "<p><b>Show Actuals</b> reveals ACTUAL, VARIANCE, and HOT COST; <b>Hide Actuals</b> hides them without removing entered values. Enter each line’s actual spend as a total amount, not a per-unit rate.</p><p><b>Hot Cost</b> uses the entered Actual (including an explicit zero) where present, otherwise the budget amount. <b>Variance = Hot Cost − Budget</b>: red is over budget, green is under. Thus untouched lines do not look under budget merely because their Actual is blank. Values and associated fringes roll up through the budget and footer as you type.</p>"
+  },
+  {
+    "title": "Contingency & Lock Budget",
+    "body": "<p>Click the Top Sheet’s <b>Contingency</b> summary line to set its percentage in the dialog. It is calculated on the budget including fringes and included in Grand Total.</p><p><b>Lock Budget</b> stores the current Grand Total as <b>Original Total</b>. It does not prevent editing or freeze every line. The separate locked-baseline Variance compares the current Grand Total with that saved original; this is distinct from the Actuals/Hot Cost variance. <b>Re-lock Original</b> replaces the baseline after confirmation; <b>Unlock</b> removes the baseline comparison.</p>"
+  },
+  {
+    "title": "Find & keyboard shortcuts",
+    "body": "<p><b>Find</b> searches account and sub-account names and detail descriptions in the selected budget. Click a result to jump to it.</p><ul><li><b>Cmd/Ctrl+N</b>: new budget.</li><li><b>Cmd/Ctrl+F</b>: toggle Find.</li><li><b>Cmd/Ctrl+E</b>: Export &amp; Share.</li><li><b>Cmd/Ctrl+M</b>: Setup.</li><li><b>Cmd/Ctrl+Z</b>: Undo; <b>Cmd/Ctrl+Shift+Z</b>: Redo.</li></ul><p>These are app-specific shortcuts; Cmd/Ctrl+M opens Setup here. Text fields retain normal cut, copy, and paste. Escape cancels an open confirmation or closes supported menus/dialogs.</p>"
+  },
+  {
+    "title": "Export & Share, backups & storage",
+    "body": "<p>The installed app currently autosaves budgets in its <b>local app storage</b> on this computer. They are not automatically cloud-synced or saved as independent files in Documents. There is no separate native Save/Open workflow in this release. The Saved indicator reports recent autosaves; it is not proof of an external backup.</p><p>Open <b>Export &amp; Share</b> in the toolbar. Choose sections and layout options for your report; settings are remembered per budget.</p><ul><li><b>Export PDF</b>: opens the print flow; choose Save as PDF to create a shareable report.</li><li><b>Export CSV / Export Excel</b>: spreadsheet-friendly reports.</li><li><b>Export .nlb</b>: a full, lossless backup of the selected budget, including lines, notes, globals, units, fringes, groups, Actuals, and lock state.</li></ul><p>Use .nlb for transfer or restoration, not PDF/CSV/Excel. Export each important budget separately and store backups somewhere safe. Replacing the app in Applications is intended to preserve its local data; do not clear app data or use an uninstaller.</p>"
+  },
+  {
+    "title": "Import .nlb, CSV & Movie Magic XML",
+    "body": "<p>Click <b>Import</b> in the left sidebar, directly below + New Budget. Imports create a new budget entry rather than merging into the currently selected budget.</p><ul><li><b>.nlb</b>: restores a full exported budget backup.</li><li><b>CSV</b>: builds a budget from the app’s CSV column layout; it is not a full-fidelity backup.</li><li><b>Movie Magic (.xml)</b>: opens a review before creating the budget. Confirm category assignments to ATL / BTL / BTL POST / OTHER and Contingency. Set fringe display names and starting rates, group names and colors, global names and values, and unit plural forms/hour-equivalence where offered. XML may contain bare codes without full definitions, so verify those values and totals against the original before relying on the import.</li></ul>"
+  },
+  {
+    "title": "Version & manual Mac updates",
+    "body": "<p>View the installed version in the native <b>NO LONGER BUDGET → About</b> menu, not the toolbar. Use <b>Check for Updates…</b> or <b>How to Update…</b> in that same Mac app menu.</p><p>Updates currently use a <b>manual installation</b>, not a background download/restart install:</p><ol><li>Back up each important budget through <b>Export &amp; Share → Export .nlb</b>.</li><li>Open the GitHub download page from the update guide and download the <b>arm64.dmg</b> asset for an Apple Silicon Mac.</li><li>Quit the app with <b>Cmd+Q</b>, open the DMG, drag the app into Applications, and choose <b>Replace</b>.</li><li>Reopen from Applications and check About and your budgets.</li></ol><p>If macOS blocks this beta, cancel the warning and use <b>System Settings → Privacy &amp; Security → Open Anyway</b>, if offered. Do not disable macOS security or delete the app’s data.</p>"
+  }
+];
 
   function helpSectionsHTML(filter) {
     var f = (filter || '').trim().toLowerCase();
@@ -4634,7 +4593,7 @@
         '<option value="percent"' + (f.type === 'percent' ? ' selected' : '') + '>% of wages</option>' +
         '<option value="flat"' + (f.type === 'flat' ? ' selected' : '') + '>Flat per line</option>' +
         '</select></td>' +
-        '<td class="col-rate"><div class="money"><span class="dollar">' + (f.type === 'percent' ? '%' : esc(currencySymbol())) + '</span><input type="text" inputmode="decimal" class="fringe-rate" data-id="' + f.id + '" value="' + esc(f.rate) + '" aria-label="Fringe rate"></div></td>' +
+        '<td class="col-rate"><div class="money' + (f.type === 'percent' ? ' percent' : '') + '"><span class="dollar">' + (f.type === 'percent' ? '%' : esc(currencySymbol())) + '</span><input type="text" inputmode="decimal" class="fringe-rate" data-id="' + f.id + '" value="' + esc(f.rate) + '" aria-label="Fringe rate"></div></td>' +
         '<td class="col-total manager-readonly">' + esc(fmt(fringeDollarTotal(f))) + '</td>' +
         '<td class="col-uses manager-readonly">' + fringeUsageCount(f) + '</td>' +
         '<td class="col-rm"><button class="rm-line" data-action="delete-fringe" data-id="' + f.id + '" aria-label="Delete fringe">&times;</button></td>' +
@@ -4645,7 +4604,7 @@
   }
 
   function fringesHintHTML() {
-    return '<p class="hint">Apply fringes from a line’s drag-handle menu, or use the % button above Description to apply to all or selected lines.</p>';
+    return '<p class="hint">Apply fringes from a line’s drag-handle menu, or use the three-dot menu above Description to apply to all or selected lines.</p>';
   }
 
   function renderFringesPanel() {
