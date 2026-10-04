@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Validate payment ledger calculations
+        run: node tests/payments-core.test.cjs
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Build and publish Apple Silicon Mac release
