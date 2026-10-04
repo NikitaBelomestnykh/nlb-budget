@@ -1,0 +1,26 @@
+name: Publish Mac Release
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mac-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build and publish Apple Silicon Mac release
+        run: npm run release:mac -- --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
