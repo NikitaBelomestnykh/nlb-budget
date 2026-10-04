@@ -723,14 +723,32 @@
   tr.row-selected { outline: 2px solid var(--accent); outline-offset: -2px; }
 
   /* v1.5: stable columns, title strip, and focus-only overflow editors. */
-  .toolbar { padding-top: 34px !important; }
+  .toolbar { container-type: inline-size; }
   .toolbar-center { justify-content: flex-start; }
   .toolbar-spacer { width: 0; }
-  .toolbar-budget-title { position: absolute; top: 6px; left: 54px; right: 54px; text-align: center; font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .main { padding-top: 114px; }
+  .toolbar-budget-title { position: static; flex: 1 1 220px; min-width: 40px; text-align: center; font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .main { padding-top: 94px; }
   .lines-table th.col-uses, .lines-table td.col-uses { width: 64px; min-width: 64px; white-space: nowrap !important; overflow-wrap: normal; word-break: normal; }
-  .manager-table { min-width: 580px; }
-  .manager-table:has(.fringe-rate), .manager-table:has(.group-name) { min-width: 680px; }
+  .side-panel .manager-table { width: 100%; min-width: 0; table-layout: fixed; }
+  .side-panel .manager-table .col-name { width: auto; }
+  #globals-panel .manager-table .col-name { width: 42%; }
+  #fringes-panel .manager-table .col-unit { width: 104px; }
+  #groups-panel .manager-table .col-unit { width: 110px; }
+  .side-panel .manager-table .col-rm { width: 34px; }
+  .side-panel .manager-table th.col-uses, .side-panel .manager-table td.col-uses { width: 64px; min-width: 64px; }
+  .side-panel { box-shadow: none; visibility: hidden; pointer-events: none; transition: transform .2s ease, visibility 0s linear .2s; }
+  .side-panel.open { visibility: visible; pointer-events: auto; transition: transform .2s ease; }
+  @container (max-width: 700px) {
+    .toolbar-center { gap: 4px; }
+    .toolbar-gap-lg { width: 4px; }
+    .toolbar-group { gap: 4px; }
+    .toolbar-center .btn-ghost { padding: 5px 6px; font-size: 11px; }
+    .toolbar-budget-title { font-size: 12px; flex-basis: 140px; }
+  }
+  @container (max-width: 620px) {
+    .toolbar-center [data-action="open-find"] span, .toolbar-center [data-action="lock-budget"] span { display: none; }
+    .toolbar-gap-lg { width: 2px; }
+  }
   .notes-line { width: 100%; min-width: 0; }
   .notes-line input { width: 0; min-width: 0; flex: 1 1 0; }
   .desc-cell { min-height: 28px; }
@@ -874,7 +892,7 @@
   "use strict";
 
   var STORE_KEY = "no-longer-budget-v9";
-  var APP_VERSION = "1.5.1"; // Semantic version: +0.0.1 bug fixes, +0.1.0 new features, +1.0.0 major releases. Bump with each change and log it in the Build Log.
+  var APP_VERSION = "1.5.2"; // Semantic version: +0.0.1 bug fixes, +0.1.0 new features, +1.0.0 major releases. Bump with each change and log it in the Build Log.
   var GROUPS = [
     { value: "ATL", label: "ATL" },
     { value: "BT", label: "BTL" },
@@ -2603,8 +2621,7 @@
   function toolbarHTML() {
     var b = active();
     if (!b) return '';
-    return '<div class="toolbar-budget-title" title="' + esc(b.title) + '">' + esc(b.title) + '</div>' +
-      '<button type="button" id="sidebar-toggle-btn" aria-label="Toggle sidebar">' +
+    return '<button type="button" id="sidebar-toggle-btn" aria-label="Toggle sidebar">' +
       '<span class="icon-collapse">&#10094;</span><span class="icon-expand">&#9776;</span>' +
       '</button>' +
       '<div class="toolbar-center">' +
@@ -2613,14 +2630,15 @@
       '</div>' +
       '<span class="toolbar-gap-lg" aria-hidden="true"></span>' +
       '<div class="toolbar-group">' +
-      '<button type="button" class="btn btn-ghost" data-action="open-find">' + SEARCH_ICON + '<span>Find</span></button>' +
+      '<button type="button" class="btn btn-ghost" data-action="open-find" aria-label="Find">' + SEARCH_ICON + '<span>Find</span></button>' +
       '</div>' +
       '<span class="toolbar-gap-lg" aria-hidden="true"></span>' +
       '<div class="toolbar-group">' +
-      '<button type="button" class="btn btn-ghost" data-action="lock-budget">' + LOCK_ICON + '<span>' + (b.locked ? 'Re-lock Original' : 'Lock Budget') + '</span></button>' +
+      '<button type="button" class="btn btn-ghost" data-action="lock-budget" aria-label="Lock or re-lock budget">' + LOCK_ICON + '<span>' + (b.locked ? 'Re-lock Original' : 'Lock Budget') + '</span></button>' +
       (b.locked ? '<button type="button" class="btn btn-ghost" data-action="unlock-budget">Unlock</button>' : '') +
       '<button type="button" class="btn btn-ghost actuals-toggle-btn' + (b.showActuals ? ' on' : '') + '" data-action="toggle-actuals">' + (b.showActuals ? 'Hide Actuals' : 'Show Actuals') + '</button>' +
       '</div>' +
+      '<div class="toolbar-budget-title" title="' + esc(b.title) + '">' + esc(b.title) + '</div>' +
       '<div class="toolbar-group" style="margin-left:auto;">' +
       '<button type="button" class="btn btn-ghost" data-action="open-export">Export &amp; Share</button>' +
       '<button type="button" class="btn btn-ghost" id="install-app-btn" data-action="install-app" style="display:none;">Install App</button>' +
