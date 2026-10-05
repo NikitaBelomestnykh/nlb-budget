@@ -1,4 +1,4 @@
-# Payments, timeline and documents (v1.6.0 beta)
+# Payments, timeline and documents (v1.6.1 beta)
 
 ## Start here
 1. Build your budget normally: Top Sheet → Account → Sub-account → detail lines. Keep different vendors on separate lines.
@@ -27,3 +27,12 @@ Export payment PDF/.xlsx/CSV by account/sub-account/vendor/line. Exports are sna
 
 ## Compatibility and validation
 No destructive reset or legacy reconciliation. Unmanaged manual Actuals retain the existing workflow; use Payments for dated paid-only ledgers and deposit-aware forecasts. The in-app Help guide includes the new workflow. Local Chromium tests cover financial rules, shared payments, partial settlement, corrections/refunds, relative dates, file:// startup, original-file backup/restore, CSV/Excel/PDF/ICS/ZIP/binder outputs and existing budgeting regressions. Live Mac installation and Apple/Google calendar import still require verification. Updates remain guided manual installations; v1.5.3 is the rollback release.
+
+## v1.6.1 interface fixes
+- Calendar-picker icons match date-input text in dark/light mode. All top-right close controls use the same size/style.
+- Save timeline displays a read-only summary and visible header save status; Edit timeline restores inputs. Cancel discards unsaved edits.
+- Labels and inputs have consistent gaps; editor actions occupy a separate row, never covering scrolling fields. Document toolbar controls align and Search documents is visibly labeled.
+- Inapplicable amount/date fields are disabled, skipped by keyboard navigation, and have hover explanations. Managed Actuals cannot be edited directly; use paid postings/corrections.
+- Document assignments have text, account, sub-account and type filters. Hidden checked items remain selected, and filtering does not discard unsaved document names/tags.
+- Tooltips are clamped to the viewport.
+- Schedules now show Vendor for this payment and Create vendor & use here. Creating/canceling a vendor returns to the intact schedule draft. Adding a payment from a line saves pending line setup first; fixed-allocation rows can infer their single existing vendor. Save payment schedule explicitly commits assignments; mismatched vendor allocations produce a clear error.
