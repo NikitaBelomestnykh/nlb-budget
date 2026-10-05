@@ -1,4 +1,4 @@
-# Payments, timeline and documents (v1.6.1 beta)
+# Payments, timeline and documents (v1.7.0 beta)
 
 ## Start here
 1. Build your budget normally: Top Sheet → Account → Sub-account → detail lines. Keep different vendors on separate lines.
@@ -19,7 +19,7 @@ Unallocated costs and installments lacking a due date stay Not scheduled yet. Co
 Calendar view and PDF show dated outgoing/incoming items. Export .ics as a snapshot: create a dedicated destination calendar in Apple/Google Calendar and import it. For a new snapshot, delete the old dedicated calendar and import into a new one. No live sync; the app never creates/deletes external calendars.
 
 ## Documents and backups
-Setup → Documents allows upload first/assignment later, original download, internal names/tags, multiple line/sub-account/payment assignments, and PDF/supported-image previews. New uploads default Internal. Shared ZIP and binder exports exclude Internal documents unless explicitly included. A full .nlb backup includes all originals, including Internal documents, and referenced vendors only; treat backups as sensitive.
+Setup → Documents allows upload first/assignment later, original download, internal names/tags, multiple line/sub-account/payment assignments, and PDF/supported-image previews. Filter each data column and use Assigned / Unassigned / Archived statuses. Archive is reversible organization: originals, links, backup inclusion and existing binder privacy defaults are preserved. New uploads default to Exclude from binder by default (sensitive) under Export privacy. This is a local export preference, not online sharing/access control. Binder exports exclude those sensitive files unless explicitly included. Download ZIP… opens a chooser for individual originals, Select matching, or Select all documents; any sensitive/archived file may be included when explicitly checked. Search does not discard hidden checked files. A full .nlb backup includes all originals, including sensitive/archived documents, and referenced vendors only; treat backups as sensitive.
 
 Original bytes live locally in IndexedDB, separate from small budget settings. Do not clear the app's storage. Export external full backups regularly. Importing a full .nlb on another computer restores the original files and referenced vendors as a new budget. Invalid/missing-file backups stop instead of creating incomplete records. The document upload limit is 100 MB/file; device storage and memory also limit capacity.
 
@@ -36,3 +36,9 @@ No destructive reset or legacy reconciliation. Unmanaged manual Actuals retain t
 - Document assignments have text, account, sub-account and type filters. Hidden checked items remain selected, and filtering does not discard unsaved document names/tags.
 - Tooltips are clamped to the viewport.
 - Schedules now show Vendor for this payment and Create vendor & use here. Creating/canceling a vendor returns to the intact schedule draft. Adding a payment from a line saves pending line setup first; fixed-allocation rows can infer their single existing vendor. Save payment schedule explicitly commits assignments; mismatched vendor allocations produce a clear error.
+
+## v1.7.0 Vendors and Documents refinements
+- Vendor table text is selectable/copyable, including contacts, phone/email, addresses and notes. Attachment status is scoped to the selected budget: Attached (green), Not Attached (yellow), or Archived (yellow). Archives remain below an Archive divider and preserve existing budget/payment links. Filter Vendor, Contact, Terms/notes and Status independently; filters combine with global search.
+- Documents show Assigned (green), Unassigned (yellow), or Archived (red). Archive/Unarchive preserves original files, names/tags and assignments; archived entries stay below an Archive divider. Row actions are left-aligned. Every data column has a filter; the old Unassigned only checkbox and Sharing column are removed.
+- Sharing was never an external link or online service. The existing internal flag is relabeled Export privacy in document details, preserving default binder inclusion behavior. ZIP download now requires explicit file selection rather than silently omitting sensitive originals.
+- Upload Documents… opens the native chooser. Preview’s Close preview control is in the workspace’s upper-right corner and returns to the library. ZIP selection includes a searchable list, individual checkboxes, all/matching selection and Clear selection; the downloaded index includes document status/privacy metadata.
