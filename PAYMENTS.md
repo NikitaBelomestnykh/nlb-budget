@@ -1,4 +1,4 @@
-# Payments, timeline and documents (v1.7.0 beta)
+# Payments, timeline and documents (v1.7.1 beta)
 
 ## Start here
 1. Build your budget normally: Top Sheet → Account → Sub-account → detail lines. Keep different vendors on separate lines.
@@ -42,3 +42,10 @@ No destructive reset or legacy reconciliation. Unmanaged manual Actuals retain t
 - Documents show Assigned (green), Unassigned (yellow), or Archived (red). Archive/Unarchive preserves original files, names/tags and assignments; archived entries stay below an Archive divider. Row actions are left-aligned. Every data column has a filter; the old Unassigned only checkbox and Sharing column are removed.
 - Sharing was never an external link or online service. The existing internal flag is relabeled Export privacy in document details, preserving default binder inclusion behavior. ZIP download now requires explicit file selection rather than silently omitting sensitive originals.
 - Upload Documents… opens the native chooser. Preview’s Close preview control is in the workspace’s upper-right corner and returns to the library. ZIP selection includes a searchable list, individual checkboxes, all/matching selection and Clear selection; the downloaded index includes document status/privacy metadata.
+
+## v1.7.1 input and fringe fixes
+- Return on the physical last regular detail line appends a new regular line and focuses the same column. Existing down/up navigation and expanded editors work; a trailing subtotal is not ignored. The insertion is undoable/redoable.
+- Numeric budget fields, globals/formulas and payment amounts accept US-style thousands grouping (1,250.50). Payment forms validate formatted amounts and reject malformed grouping without posting changes. Numeric formulas normalize literal leading zeros rather than interpreting them as octal.
+- QTY/X remove leading zeros when committed, including when Return moves away; zero, decimals and negative numbers retain their meaning. Global expressions remain editable.
+- Applied fringes appear immediately, including zero-rate/zero-amount definitions. Detail breakdown rows update as amounts or fringe rates/types change, without navigating away or rebuilding focused line inputs.
+- Checkbox pointer selection no longer outlines the containing row/cell. Checkbox sizing is fixed; keyboard focus remains visible around the checkbox itself.

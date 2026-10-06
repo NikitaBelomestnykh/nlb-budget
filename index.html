@@ -772,6 +772,12 @@
   @media (max-width: 760px) { .main { padding-top: 20px; } }
   @media print { .cell-editor-popout, .bulk-delete-bar { display: none !important; } }
 
+
+  input[type="checkbox"]:focus:not(:focus-visible) { outline: none; }
+  .lines-table input[type="checkbox"] { width:16px; height:16px; min-height:16px; padding:0; margin:0; background:transparent; border-color:var(--border); outline:none; }
+  .lines-table input[type="checkbox"]:hover,.lines-table input[type="checkbox"]:focus { background:transparent; border-color:var(--border); }
+  input[type="checkbox"]:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  tr.row-selected:has(input[type="checkbox"]) { outline:none; }
 </style>
 <link rel="stylesheet" href="assets/payments.css">
 <script src="assets/payment-core.js"></script>
@@ -903,7 +909,7 @@
   "use strict";
 
   var STORE_KEY = "no-longer-budget-v9";
-  var APP_VERSION = "1.7.0"; // Semantic version: +0.0.1 bug fixes, +0.1.0 new features, +1.0.0 major releases. Bump with each change and log it in the Build Log.
+  var APP_VERSION = "1.7.1"; // Semantic version: +0.0.1 bug fixes, +0.1.0 new features, +1.0.0 major releases. Bump with each change and log it in the Build Log.
   var GROUPS = [
     { value: "ATL", label: "ATL" },
     { value: "BT", label: "BTL" },
@@ -1554,8 +1560,8 @@
   }
 
   function lineAmount(l) {
-    var x = (l.x === "" || l.x == null) ? 1 : (Number(l.x) || 0);
-    return (Number(l.qty) || 0) * x * (Number(l.rate) || 0);
+    var x = (l.x === "" || l.x == null) ? 1 : (amountNumber(l.x) || 0);
+    return (amountNumber(l.qty) || 0) * x * (amountNumber(l.rate) || 0);
   }
 
   function matchUnitDef(name) {
@@ -1576,7 +1582,7 @@
     if (raw == null || raw === '') return raw;
     var def = matchUnitDef(raw);
     if (!def) return raw;
-    var qtyNum = Number(l.qty);
+    var qtyNum = amountNumber(l.qty);
     var isSingular = (!isNaN(qtyNum) && qtyNum === 1);
     return isSingular ? def.name : def.plural;
   }
@@ -1828,8 +1834,8 @@
     }
     var evaluated = evalExprSafe(resolved);
     if (evaluated != null) return evaluated;
-    if (str.trim() !== '' && /^-?[0-9]*\.?[0-9]+$/.test(str.trim())) {
-      var n2 = Number(str);
+    if (str.trim() !== '' && /^-?[0-9]*\.?[0-9]+$/.test(normalizeGroupedNumber(str))) {
+      var n2 = amountNumber(str);
       if (!isNaN(n2)) return n2;
     }
     return raw;
@@ -1898,7 +1904,7 @@
     el.setSelectionRange(value.length, newValue.length);
   }
 
-  function resolveGlobalTokens(raw) {
+  function resolveGlobalTokens(raw, numeric) {
     if (raw == null) return raw;
     var str = String(raw);
     var b = active();
@@ -1916,9 +1922,10 @@
         substituted = substituted.replace(re, function () { return strVal; });
       }
     });
-    var mathTest = substituted.replace(/\s+/g, '');
+    var mathText = numeric ? normalizeNumericExpression(substituted) : substituted;
+    var mathTest = mathText.replace(/\s+/g, '');
     if (mathTest !== '' && /^[0-9+\-*\/().]+$/.test(mathTest)) {
-      var evaluated = evalMath(substituted);
+      var evaluated = evalMath(mathText);
       if (evaluated != null) return String(Math.round(evaluated * 100) / 100);
       if (/^-?[0-9]*\.?[0-9]+$/.test(mathTest)) return mathTest;
     }
@@ -1967,7 +1974,7 @@
           if (l.raw) {
             ['qty', 'x', 'rate', 'description', 'unit'].forEach(function (field) {
               if (l.raw[field] == null) return;
-              l[field] = resolveGlobalTokens(l.raw[field]);
+              l[field] = resolveGlobalTokens(l.raw[field], ['qty','x','rate'].indexOf(field) !== -1);
             });
           }
         });
@@ -1989,7 +1996,7 @@
   }
 
   function lineActualAmount(l) {
-    return Number(l.actual) || 0;
+    return amountNumber(l.actual) || 0;
   }
 
   function lineHasActual(l) {
@@ -2166,9 +2173,30 @@
       .replace(/'/g, "&#39;");
   }
 
+
+  // Accept US-style thousands separators without interpreting decimal commas as thousands.
+  function normalizeGroupedNumber(value) {
+    var text = String(value == null ? '' : value).trim();
+    return /^[+-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?$/.test(text) ? text.replace(/,/g, '') : text;
+  }
+  function amountNumber(value) { return Number(normalizeGroupedNumber(value)); }
+  function normalizeNumericExpression(value) {
+    var text = String(value == null ? '' : value);
+    if (!/^[0-9,+\-*/().\s]+$/.test(text)) return text;
+    return text.replace(/\d[\d,]*(?:\.\d*)?/g, function (token) {
+      var clean = normalizeGroupedNumber(token);
+      return clean.indexOf(',') >= 0 ? token : clean.replace(/^0+(?=\d)/, '');
+    });
+  }
+  function readFormAmount(value, label) {
+    var number = amountNumber(value);
+    if (!Number.isFinite(number)) throw Error('Enter a valid amount for ' + label + '. Use commas only for thousands, such as 1,250.50.');
+    return number;
+  }
+
   function evalMath(str) {
     if (typeof str !== "string") return null;
-    var s = str.trim();
+    var s = normalizeNumericExpression(str).trim();
     if (!s) return null;
     if (!/^[0-9+\-*/().\s]+$/.test(s)) return null;
     if (!/[+\-*/]/.test(s)) return null;
@@ -2424,6 +2452,7 @@
           var focusables = Array.from(document.querySelectorAll('input:not([type="checkbox"]), select, button, a[href]')).filter(function (el) { return el.offsetParent !== null && !el.disabled && el.tabIndex >= 0; });
           next = focusables[focusables.indexOf(source) + (e.shiftKey ? -1 : 1)];
         }
+        if (!next && e.key === 'Enter' && !e.shiftKey && !e.repeat && row && appendLineFromLastRow(row, field)) return;
         closeExpandedEditor(true);
         if (next) { next.focus(); if (next.select) next.select(); }
         else source.focus();
@@ -2749,7 +2778,7 @@
         var segFringeHotCost = segmentLines.reduce(function (sum, l) { return sum + lineFringeHotCost(l); }, 0);
         var segActual = segmentLines.reduce(function (sum, l) { return sum + lineActualAmount(l); }, 0);
         var segEstFinal = segmentLines.reduce(function (sum, l) { return sum + lineEstimatedFinal(l); }, 0);
-        var out = (segFringe > 0 || segFringeActual > 0 || segFringeHotCost > 0) ? fringeRowHTML(account, sub, segFringe, segFringeActual, segFringeHotCost) : '';
+        var out = (hasAppliedFringes(segmentLines) || segFringe !== 0 || segFringeActual !== 0 || segFringeHotCost !== 0) ? fringeRowHTML(account, sub, segFringe, segFringeActual, segFringeHotCost) : '';
         out += subtotalRowHTML(sub, item, val, segActual, segEstFinal);
         runningSum = 0;
         segmentLines = [];
@@ -2764,7 +2793,7 @@
     var wholeFringeTotal = sub.lines.reduce(function (sum, l) { return (l.kind === "subtotal") ? sum : sum + lineFringeAmount(l); }, 0);
     var wholeFringeActualTotal = sub.lines.reduce(function (sum, l) { return (l.kind === "subtotal") ? sum : sum + lineFringeActualAmount(l); }, 0);
     var wholeFringeHotCostTotal = sub.lines.reduce(function (sum, l) { return (l.kind === "subtotal") ? sum : sum + lineFringeHotCost(l); }, 0);
-    if (wholeFringeTotal > 0 || wholeFringeActualTotal > 0 || wholeFringeHotCostTotal > 0) rows += fringeRowHTML(account, sub, wholeFringeTotal, wholeFringeActualTotal, wholeFringeHotCostTotal);
+    if (hasAppliedFringes(sub.lines) || wholeFringeTotal !== 0 || wholeFringeActualTotal !== 0 || wholeFringeHotCostTotal !== 0) rows += fringeRowHTML(account, sub, wholeFringeTotal, wholeFringeActualTotal, wholeFringeHotCostTotal);
     main.innerHTML =
       '<div class="breadcrumbs">' +
       '<button class="crumb" data-action="back-to-sheet">' + esc(b.title) + '</button>' +
@@ -2863,11 +2892,38 @@
     fitUnitColumn();
   }
 
+
+  function hasAppliedFringes(lines) {
+    return lines.some(function (l) { return l.kind !== 'subtotal' && (l.fringeIds || []).some(function (id) { return !!findFringe(id); }); });
+  }
+  function refreshDetailFringeRows() {
+    if (view.mode !== 'detail') return;
+    var found = findSubAccount(view.subAccountId), tbody = document.querySelector('#main .detail-table tbody');
+    if (!found || !tbody) return;
+    tbody.querySelectorAll('tr.fringe-row').forEach(function (tr) { tr.remove(); });
+    var regular = [], segment = [];
+    function insert(lines, before) {
+      var base = lines.reduce(function (n, l) { return n + lineFringeAmount(l); }, 0);
+      var actual = lines.reduce(function (n, l) { return n + lineFringeActualAmount(l); }, 0);
+      var hot = lines.reduce(function (n, l) { return n + lineFringeHotCost(l); }, 0);
+      if (!hasAppliedFringes(lines) && base === 0 && actual === 0 && hot === 0) return;
+      var html = fringeRowHTML(found.account, found.sub, base, actual, hot);
+      if (before) before.insertAdjacentHTML('beforebegin', html);
+      else tbody.insertAdjacentHTML('beforeend', html);
+    }
+    found.sub.lines.forEach(function (l) {
+      if (l.kind === 'subtotal') { insert(segment, tbody.querySelector('tr[data-id="' + l.id + '"]')); segment = []; }
+      else { segment.push(l); regular.push(l); }
+    });
+    insert(regular, null);
+  }
+
   function refreshComputed() {
     var b = active();
     if (!b) { renderFooter(); return; }
     refreshAllUnitDisplays();
     fitUnitColumn();
+    refreshDetailFringeRows();
     b.accounts.forEach(function (a) {
       var accSub = document.getElementById('sub-' + a.id);
       if (accSub) accSub.textContent = fmt(accountSubtotal(a));
@@ -3301,7 +3357,7 @@
       value: current,
       suffix: '%',
       onSave: function (input) {
-        var pct = parseFloat(input);
+        var pct = amountNumber(input);
         if (isNaN(pct) || pct < 0) return;
         snapshotState();
         b.contingencyPercent = pct;
@@ -3576,7 +3632,7 @@
   },
   {
     "title": "Edit lines, formulas & expanded fields",
-    "body": "<p>A detail line’s base cost is <b>QTY × X × RATE</b>. UNIT is a label, not an additional multiplier. Numeric fields accept expressions such as <code>85*3</code>; click away to commit. <b>Tab / Shift+Tab</b> move right/left across editable detail fields; <b>Enter / Shift+Enter</b> move down/up within the same field.</p><p>If your typed text is wider than a field, an expanded editor opens below the row while that field is selected. Moving to another cell collapses it back to its displayed value. Click back in to see and edit the original text or global expression. UNIT widths adapt to their displayed values; narrow windows may require horizontal table scrolling.</p>"
+    "body": "<p>A detail line’s base cost is <b>QTY × X × RATE</b>. UNIT is a label, not an additional multiplier. Numeric fields accept thousands separators such as <code>1,250.50</code> and expressions such as <code>1,000*3</code>; click away to commit. QTY and X remove leading zeros on commit (005 becomes 5; 0.5 stays 0.5). <b>Tab / Shift+Tab</b> move right/left across editable detail fields; <b>Enter / Shift+Enter</b> move down/up within the same field. On the last regular row with nothing below, Enter adds a new regular line and keeps the same field selected. A subtotal below is not treated as an empty end of the list.</p><p>If your typed text is wider than a field, an expanded editor opens below the row while that field is selected. Moving to another cell collapses it back to its displayed value. Click back in to see and edit the original text or global expression. UNIT widths adapt to their displayed values; narrow windows may require horizontal table scrolling.</p>"
   },
   {
     "title": "Reorder & renumber",
@@ -3596,7 +3652,7 @@
   },
   {
     "title": "Fringes: define & apply costs",
-    "body": "<p>Open <b>Setup → Fringes</b>, then <b>+ Add fringe</b>. Set its Name, Type, and Rate. <b>% of wages</b> applies a percentage to each assigned line’s base amount; enter <b>21.5</b> for 21.5%, not 0.215. <b>Flat per line</b> adds that currency amount once to each assigned detail line, not once per unit. The <b>$ Total</b> and <b>Uses</b> columns show the budgeted fringe cost and number of assigned lines.</p><p>For one line, click its drag-handle menu → <b>Apply fringes</b> and toggle the fringe checklist. For bulk assignment, click the <b>three-dot menu in the detail table header</b> → <b>Fringes</b>, choose fringes, then <b>Apply to all lines</b> or <b>Select lines to apply to…</b>. In selection mode, check the desired rows and click <b>Apply to selected</b>; use Select all or Cancel as needed. Use a row’s checklist to remove a fringe from that line.</p><p>Fringes belong to detail lines, not directly to accounts. They roll up into sub-account, account, category, and Grand Total amounts. Breakdown rows are informational: do not add them again to those totals. Click × in the manager to delete a definition after confirmation.</p>"
+    "body": "<p>Open <b>Setup → Fringes</b>, then <b>+ Add fringe</b>. Set its Name, Type, and Rate. <b>% of wages</b> applies a percentage to each assigned line’s base amount; enter <b>21.5</b> for 21.5%, not 0.215. <b>Flat per line</b> adds that currency amount once to each assigned detail line, not once per unit. Applied fringes appear immediately as breakdown rows, even at a zero starting rate, and update live as amounts/rates change. The <b>$ Total</b> and <b>Uses</b> columns show the budgeted fringe cost and number of assigned lines.</p><p>For one line, click its drag-handle menu → <b>Apply fringes</b> and toggle the fringe checklist. For bulk assignment, click the <b>three-dot menu in the detail table header</b> → <b>Fringes</b>, choose fringes, then <b>Apply to all lines</b> or <b>Select lines to apply to…</b>. In selection mode, check the desired rows and click <b>Apply to selected</b>; use Select all or Cancel as needed. Use a row’s checklist to remove a fringe from that line.</p><p>Fringes belong to detail lines, not directly to accounts. They roll up into sub-account, account, category, and Grand Total amounts. Breakdown rows are informational: do not add them again to those totals. Click × in the manager to delete a definition after confirmation.</p>"
   },
   {
     "title": "Groups: line tags & totals",
@@ -4436,7 +4492,7 @@
       return keys.map(function (code) {
         return '<div class="mmb-code-row"><span class="mmb-code">' + esc(code) + '</span>' +
           '<input type="text" class="mmb-fringe-name" data-code="' + esc(code) + '" value="' + esc(names[code]) + '" placeholder="Name">' +
-          '<input type="number" step="0.1" min="0" class="mmb-fringe-rate" data-code="' + esc(code) + '" value="' + esc(String(rates[code] != null ? rates[code] : 0)) + '" style="max-width:70px;flex:none;" placeholder="Rate">' +
+          '<input type="text" inputmode="decimal" step="0.1" min="0" class="mmb-fringe-rate" data-code="' + esc(code) + '" value="' + esc(String(rates[code] != null ? rates[code] : 0)) + '" style="max-width:70px;flex:none;" placeholder="Rate">' +
           '<span class="mmb-code-suffix">%</span>' +
           '</div>';
       }).join('');
@@ -5240,6 +5296,7 @@
       b.fringes = (b.fringes || []).filter(function (f) { return f.id !== id; });
       save();
       renderFringesPanel();
+      refreshComputed();
     });
   }
 
@@ -5495,7 +5552,7 @@
     }
     if (t.classList && t.classList.contains('fringe-rate')) {
       var f2 = findFringe(t.dataset.id);
-      if (f2) { var fv = parseFloat(t.value); f2.rate = isNaN(fv) ? 0 : fv; save(); refreshComputed(); }
+      if (f2) { var fv = amountNumber(t.value); f2.rate = isNaN(fv) ? 0 : fv; save(); refreshComputed(); }
       return;
     }
     if (t.classList && t.classList.contains('group-name')) {
@@ -5573,6 +5630,11 @@
     var t = e.target;
     if (!t || !t.classList) return;
     if (expandedEditor && t === expandedEditor.source && e.relatedTarget === expandedEditor.input) return;
+    if (t.classList.contains('fringe-rate')) {
+      var fringeBlur = findFringe(t.dataset.id);
+      if (fringeBlur && Number.isFinite(amountNumber(t.value))) { fringeBlur.rate = amountNumber(t.value); t.value = String(fringeBlur.rate); save(); refreshComputed(); }
+      return;
+    }
     if (t.classList.contains('global-value')) {
       var gBlur = findGlobalById(t.dataset.id);
       if (gBlur) {
@@ -5589,7 +5651,7 @@
       }
       return;
     }
-    if (!(t.classList.contains('qty') || t.classList.contains('x') || t.classList.contains('rate') || t.classList.contains('desc') || t.classList.contains('unit'))) return;
+    if (!(t.classList.contains('qty') || t.classList.contains('x') || t.classList.contains('rate') || t.classList.contains('actual') || t.classList.contains('desc') || t.classList.contains('unit'))) return;
     if (!t.dataset.subaccount || !t.dataset.field) return;
     var found = findSubAccount(t.dataset.subaccount);
     if (!found) return;
@@ -5600,7 +5662,12 @@
     if (!line) return;
     if (!line.raw) line.raw = {};
     line.raw[t.dataset.field] = t.value;
-    var resolved = resolveGlobalTokens(t.value);
+    var numericField = ['qty','x','rate','actual'].indexOf(t.dataset.field) !== -1;
+    var resolved = resolveGlobalTokens(t.value, numericField);
+    if (['qty','x'].indexOf(t.dataset.field) !== -1 && /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(normalizeGroupedNumber(t.value))) {
+      resolved = String(amountNumber(t.value));
+      line.raw[t.dataset.field] = resolved;
+    }
     line[t.dataset.field] = resolved;
     if (t.dataset.field === 'unit') {
       var unitDef = matchUnitDef(resolved);
@@ -5893,7 +5960,7 @@
       if (gFocus && gFocus.raw != null) t.value = gFocus.raw;
       return;
     }
-    if ((t.classList.contains('desc') || t.classList.contains('qty') || t.classList.contains('x') || t.classList.contains('rate') || t.classList.contains('unit')) && t.dataset.subaccount && t.dataset.field) {
+    if ((t.classList.contains('desc') || t.classList.contains('qty') || t.classList.contains('x') || t.classList.contains('rate') || t.classList.contains('actual') || t.classList.contains('unit')) && t.dataset.subaccount && t.dataset.field) {
       var foundFocus = findSubAccount(t.dataset.subaccount);
       if (!foundFocus) return;
       var lineFocus = null;
@@ -5982,12 +6049,28 @@
     document.querySelectorAll('tr.row-selected').forEach(function (r) { r.classList.remove('row-selected'); });
   });
 
-  var LINE_FIELD_ORDER = ['description', 'qty', 'unit', 'x', 'rate'];
+  var LINE_FIELD_ORDER = ['description', 'qty', 'unit', 'x', 'rate', 'actual'];
+
+  function appendLineFromLastRow(row, field) {
+    var found = row && findSubAccount(row.dataset.subaccount);
+    if (!found || !found.sub.lines.length || found.sub.lines[found.sub.lines.length - 1].id !== row.dataset.id) return false;
+    if (expandedEditor) closeExpandedEditor(true);
+    else if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    var history = undoStack.slice(), before = JSON.stringify(state);
+    addLine(found.sub.id);
+    var added = found.sub.lines[found.sub.lines.length - 1];
+    var target = document.querySelector('tr[data-kind="line"][data-id="' + added.id + '"]');
+    focusLineField(target, field);
+    // Programmatic focus must not add empty undo steps after the row insertion.
+    undoStack = history; undoStack.push(before); if (undoStack.length > 50) undoStack.shift();
+    return true;
+  }
+
 
   function focusLineField(row, field) {
     if (!row) return false;
     var el = row.querySelector('[data-field="' + field + '"]');
-    if (!el) return false;
+    if (!el || el.disabled || el.readOnly) return false;
     el.focus();
     if (el.select) el.select();
     return true;
@@ -6009,13 +6092,13 @@
       if (rowIdx === -1) return;
       var targetRowIdx = e.shiftKey ? rowIdx - 1 : rowIdx + 1;
       if (targetRowIdx >= 0 && targetRowIdx < rows.length) focusLineField(rows[targetRowIdx], field);
+      else if (!e.shiftKey && !e.repeat) appendLineFromLastRow(row, field);
       return;
     }
     if (e.key === 'Tab') {
       var targetFieldIdx = e.shiftKey ? fieldIdx - 1 : fieldIdx + 1;
       if (targetFieldIdx >= 0 && targetFieldIdx < LINE_FIELD_ORDER.length) {
-        e.preventDefault();
-        focusLineField(row, LINE_FIELD_ORDER[targetFieldIdx]);
+        if (focusLineField(row, LINE_FIELD_ORDER[targetFieldIdx])) e.preventDefault();
       }
       return;
     }
@@ -6067,6 +6150,7 @@
       f.type = t.value;
       save();
       renderFringesPanel();
+      refreshComputed();
       return;
     }
     if (t.classList && t.classList.contains('bulk-row-checkbox')) {
@@ -6248,10 +6332,10 @@
   const pmLabel=id=>{const r=pmRow(id);return r?`${r.account.num} / ${r.sub.num} — ${r.line.description||'Untitled line'}`:'Missing line';};
   const pmBtn=(action,label,id='',cls='')=>`<button type="button" data-pm="${action}" data-id="${esc(id)}" class="${cls}" aria-label="${esc(action==='cancel-editor'?(pm.form?.kind==='preview'?'Close preview':'Close editor'):label)}">${label}</button>`;
   const pmOpts=(items,value,blank)=>`${blank!=null?`<option value="">${esc(blank)}</option>`:''}`+items.map(x=>`<option value="${esc(x.id)}"${x.id===value?' selected':''}>${esc(x.name)}</option>`).join('');
-  const pmInput=(name,label,value='',type='text',extra='')=>`<label class="pm-field"><span class="pm-field-label">${label}</span><input name="${name}" aria-label="${label}" type="${type}" value="${esc(String(value==null?'':value))}" ${extra}></label>`;
+  const pmInput=(name,label,value='',type='text',extra='')=>`<label class="pm-field"><span class="pm-field-label">${label}</span><input name="${name}" aria-label="${label}" type="${type==='number'?'text':type}"${type==='number'?' inputmode="decimal" data-pm-numeric="true"':''} value="${esc(String(value==null?'':value))}" ${extra}></label>`;
   const pmSelect=(name,label,items,value,blank)=>`<label class="pm-field"><span class="pm-field-label">${label}</span><select name="${name}" aria-label="${label}">${pmOpts(items,value,blank)}</select></label>`;
   const pmAmount=a=>fmt(PC.money(a));
-  function pmManage(id){const cf=pmCF(),r=pmRow(id);if(!r)throw Error('Line no longer exists.');if(!cf.lineMeta[id])cf.lineMeta[id]={openingBase:Number(r.line.actual)||0,openingFringe:lineHasActual(r.line)?pmCalc.fringe(r.line,Number(r.line.actual)||0):0,closed:false};return cf.lineMeta[id];}
+  function pmManage(id){const cf=pmCF(),r=pmRow(id);if(!r)throw Error('Line no longer exists.');if(!cf.lineMeta[id])cf.lineMeta[id]={openingBase:amountNumber(r.line.actual)||0,openingFringe:lineHasActual(r.line)?pmCalc.fringe(r.line,amountNumber(r.line.actual)||0):0,closed:false};return cf.lineMeta[id];}
   function pmSync(){const b=active();if(!b||!b.cashflow)return;PC.lines(b).forEach(r=>{if(PC.meta(b,r.line.id))r.line.actual=String(PC.net(b,r.line.id,'base'));});}
   function pmError(e){const box=document.querySelector('#pm-editor-error');if(box){box.textContent=e.message||String(e);box.scrollIntoView({block:'nearest'});}else window.alert(e.message||String(e));}
   function pmCommit(fn,audit=false){const before=JSON.stringify(state);try{if(!audit)snapshotState();fn();pmSync();save();pm.notice='Saved · '+new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});if(audit){undoStack=[];redoStack=[];}pm.form=null;render();pmRender();return true;}catch(e){state=JSON.parse(before);lastBudgetListSig=null;pmError(e);return false;}}
@@ -6295,7 +6379,7 @@
   function pmEditorHTML(){const f=pm.form,cf=pmCF();let fields='',title='',kind=f.kind;const p=f.value||{};if(kind==='vendor'){title=p.id?'Edit vendor':'Create vendor';fields=`<div class="pm-grid">${pmInput('name','Vendor / display name',p.name||'','text','required')}${pmInput('legalName','Legal / payee name',p.legalName||'')}${pmInput('contact','Contact name',p.contact||'')}${pmInput('email','Email',p.email||'','email')}${pmInput('phone','Phone',p.phone||'')}${pmInput('address','Address',p.address||'')}${pmInput('terms','Default payment terms',p.terms||'')}${pmInput('notes','Notes',p.notes||'')}</div>`;}
  else if(kind==='milestone'){title='Custom milestone';fields=`<div class="pm-grid">${pmInput('name','Milestone name',p.name||'','text','required')}${pmInput('date','Date',p.date||'','date')}</div>`;}
  else if(kind==='funding'){title='Funding tranche';fields=`<div class="pm-grid">${pmInput('source','Source',p.source||'','text','required')}${pmInput('expected','Expected total',p.expected||0,'number','min="0" step="0.01"')}${pmInput('expectedDate','Expected date',p.expectedDate||'','date')}${pmInput('received','Actually received',p.received||0,'number','min="0" step="0.01"')}${pmInput('receivedDate','Received date',p.receivedDate||'','date')}${pmInput('note','Notes',p.note||'')}</div><p class="pm-note">Expected amount is the total tranche including the amount already received. Add another tranche to record funding received on a different date. Received entries require their actual received date.</p>`;}
- else if(kind==='schedule'){title=p.id?'Edit unpaid installment':'New installment / split payment';const id=p.lineId||pm.line||'',line=pmRow(id),ex=id?PC.expected(active(),id,pmCalc):{base:0,fringe:0};const vendorDefault=p.paymentVendorId||p.vendorId||line?.line.vendorId||pmRow((p.allocations||[])[0]?.lineId)?.line.vendorId||'';fields=`<div class="pm-grid">${pmInput('label','Payment label',p.label||'','text','required')}<div class="pm-vendor-picker">${pmSelect('paymentVendorId','Vendor for this payment',pmVendors().filter(v=>!v.archived||v.id===vendorDefault),vendorDefault,'Choose vendor')}${pmBtn('schedule-create-vendor','Create vendor & use here…')}</div>${pmSelect('mode','Amount type',[{id:'fixed',name:'Fixed amount / split'},{id:'percent',name:'Percentage'},{id:'remaining',name:'Remaining balance'}],p.mode||'fixed')}${pmSelect('lineId','Line for percentage / balance',pmRows().map(r=>({id:r.line.id,name:pmLabel(r.line.id)})),id,'Choose line')}${pmSelect('component','Cost component',[{id:'both',name:'Base + fringes together'},{id:'base',name:'Base only (fringes separate)'},{id:'fringe',name:'Fringes only'}],p.component||'both')}${pmInput('percent','Percentage',p.percent||50,'number','min="0.01" max="100" step="0.01"')}${pmSelect('dateMode','Date type',[{id:'fixed',name:'Fixed date'},{id:'relative',name:'Milestone-relative'}],p.dateMode||'fixed')}${pmInput('due','Fixed due date',p.due||'','date')}${pmSelect('milestone','Milestone',pmMilestones(),p.milestone||'prodStart')}${pmInput('offset','Days before (-) / after (+)',p.offset||0,'number','step="1"')}${pmInput('note','Notes',p.note||'')}</div><div class="pm-toolbar pm-vendor-help"><p class="pm-note">Choose a vendor above, or create one here without losing this schedule. The chosen vendor is assigned to allocated lines that do not yet have a vendor; lines already assigned to a different vendor must be changed separately.</p></div><div class="pm-fixed-fields"><h4>Fixed amount allocations</h4><p class="pm-note">For Fixed mode, enter the total and split it into base/fringe amounts by line. Leave unused rows at zero. For Percentage/Remaining balance, these fields are ignored. All-in invoice totals must be split into their base and fringe portions, not entered twice.</p>${pmInput('total','Whole fixed payment total',p.total!=null?p.total:(ex.base+ex.fringe),'number','min="0" step="0.01"')}<div class="pm-scroll"><table class="pm-table pm-allocation-table"><thead><tr><th>Line / vendor</th><th>Base amount</th><th>Fringe amount</th></tr></thead><tbody>${pmRows().map(r=>{const a=(p.allocations||[]).find(a=>a.lineId===r.line.id)||{base:r.line.id===id?ex.base:0,fringe:r.line.id===id?ex.fringe:0};return`<tr><td>${esc(pmLabel(r.line.id))}<br>${esc(pmVendorLabel(r.line.vendorId))}</td><td><input type="number" name="base:${esc(r.line.id)}" aria-label="Base allocation ${esc(r.line.description)}" min="0" step="0.01" value="${PC.money(a.base)}"></td><td><input type="number" name="fringe:${esc(r.line.id)}" aria-label="Fringe allocation ${esc(r.line.description)}" min="0" step="0.01" value="${PC.money(a.fringe)}"></td></tr>`;}).join('')}</tbody></table></div></div>`;}
+ else if(kind==='schedule'){title=p.id?'Edit unpaid installment':'New installment / split payment';const id=p.lineId||pm.line||'',line=pmRow(id),ex=id?PC.expected(active(),id,pmCalc):{base:0,fringe:0};const vendorDefault=p.paymentVendorId||p.vendorId||line?.line.vendorId||pmRow((p.allocations||[])[0]?.lineId)?.line.vendorId||'';fields=`<div class="pm-grid">${pmInput('label','Payment label',p.label||'','text','required')}<div class="pm-vendor-picker">${pmSelect('paymentVendorId','Vendor for this payment',pmVendors().filter(v=>!v.archived||v.id===vendorDefault),vendorDefault,'Choose vendor')}${pmBtn('schedule-create-vendor','Create vendor & use here…')}</div>${pmSelect('mode','Amount type',[{id:'fixed',name:'Fixed amount / split'},{id:'percent',name:'Percentage'},{id:'remaining',name:'Remaining balance'}],p.mode||'fixed')}${pmSelect('lineId','Line for percentage / balance',pmRows().map(r=>({id:r.line.id,name:pmLabel(r.line.id)})),id,'Choose line')}${pmSelect('component','Cost component',[{id:'both',name:'Base + fringes together'},{id:'base',name:'Base only (fringes separate)'},{id:'fringe',name:'Fringes only'}],p.component||'both')}${pmInput('percent','Percentage',p.percent||50,'number','min="0.01" max="100" step="0.01"')}${pmSelect('dateMode','Date type',[{id:'fixed',name:'Fixed date'},{id:'relative',name:'Milestone-relative'}],p.dateMode||'fixed')}${pmInput('due','Fixed due date',p.due||'','date')}${pmSelect('milestone','Milestone',pmMilestones(),p.milestone||'prodStart')}${pmInput('offset','Days before (-) / after (+)',p.offset||0,'number','step="1"')}${pmInput('note','Notes',p.note||'')}</div><div class="pm-toolbar pm-vendor-help"><p class="pm-note">Choose a vendor above, or create one here without losing this schedule. The chosen vendor is assigned to allocated lines that do not yet have a vendor; lines already assigned to a different vendor must be changed separately.</p></div><div class="pm-fixed-fields"><h4>Fixed amount allocations</h4><p class="pm-note">For Fixed mode, enter the total and split it into base/fringe amounts by line. Leave unused rows at zero. For Percentage/Remaining balance, these fields are ignored. All-in invoice totals must be split into their base and fringe portions, not entered twice.</p>${pmInput('total','Whole fixed payment total',p.total!=null?p.total:(ex.base+ex.fringe),'number','min="0" step="0.01"')}<div class="pm-scroll"><table class="pm-table pm-allocation-table"><thead><tr><th>Line / vendor</th><th>Base amount</th><th>Fringe amount</th></tr></thead><tbody>${pmRows().map(r=>{const a=(p.allocations||[]).find(a=>a.lineId===r.line.id)||{base:r.line.id===id?ex.base:0,fringe:r.line.id===id?ex.fringe:0};return`<tr><td>${esc(pmLabel(r.line.id))}<br>${esc(pmVendorLabel(r.line.vendorId))}</td><td><input type="text" inputmode="decimal" data-pm-numeric="true" name="base:${esc(r.line.id)}" aria-label="Base allocation ${esc(r.line.description)}" min="0" step="0.01" value="${PC.money(a.base)}"></td><td><input type="text" inputmode="decimal" data-pm-numeric="true" name="fringe:${esc(r.line.id)}" aria-label="Fringe allocation ${esc(r.line.description)}" min="0" step="0.01" value="${PC.money(a.fringe)}"></td></tr>`;}).join('')}</tbody></table></div></div>`;}
  else if(['record','refund','reverse'].includes(kind)){title=kind==='record'?'Record payment & post to Actuals':kind==='refund'?'Record actual refund':'Reverse mistaken posting';const max=kind==='record'?PC.pending(active(),p,pmCalc):PC.money(p.amount+PC.sum(cf.ledger.filter(e=>e.of===p.id),e=>e.amount));fields=`<p>${esc(p.label)} · Available ${pmAmount(max)}</p><div class="pm-grid">${pmInput('amount',kind==='reverse'?'Amount to reverse':'Amount',max,'number',`min="0.01" max="${max}" step="0.01" required ${kind==='reverse'?'readonly':''}`)}${pmInput('date',kind==='record'?'Paid date':kind==='refund'?'Refund received date':'Correction effective date',pmToday(),'date','required')}${pmInput('note','Reason / reference','','text',kind==='record'?'':'required')}</div><p class="pm-note">${kind==='reverse'?'A reversal corrects an erroneous posting; it is not a refund cash receipt. The original and correction remain visible. Paid postings cannot be removed through Undo.':'Posting is explicit. It changes paid Actuals and the cash ledger; document uploads alone do not.'}</p>`;}
  else if(kind==='doc'){title='Document name, tags & assignments';fields=`<div class="pm-grid">${pmInput('internalName','Internal name',p.internalName,'text','required')}${pmInput('tags','Tags (comma separated)',p.tags.join(', '))}${pmSelect('sharing','Export privacy',[{id:'internal',name:'Exclude from binder by default (sensitive)'},{id:'shareable',name:'Include in binder by default'}],p.internal?'internal':'shareable')}</div><p class="pm-note">Original filename: ${esc(p.originalName)}. Export privacy is only a local export default—not online sharing or access control. Explicit ZIP selection and full backups can include any file. Select multiple assignments; selections remain checked when hidden by filters. Uncheck all to keep this document unassigned.</p>${pmDocAssignments(p)}`;}
  else if(kind==='zip'){title='Choose documents for ZIP';fields=`<p class="pm-note">Select individual originals or all documents. This is a local download, not online sharing. Sensitive and archived files are included only when checked here; review your selection before sending the ZIP elsewhere.</p><div class="pm-toolbar">${pmInput('zipSearch','Search documents','','search','placeholder="Name, filename, tag or assignment"')}${pmBtn('zip-select-all','Select all documents')}${pmBtn('zip-select-visible','Select matching')}${pmBtn('zip-clear','Clear selection')}</div><p id="pm-zip-count" class="pm-note" role="status">0 selected</p><div class="pm-zip-list">${cf.documents.map(d=>`<label class="pm-checkbox pm-zip-option" data-search="${esc([d.internalName,d.originalName,(d.tags||[]).join(' '),d.links.map(pmDocLinkLabel).join(' ')].join(' ').toLowerCase())}"><input type="checkbox" name="zipDoc" value="${esc(d.id)}"${f.selectedIds?.includes(d.id)?' checked':''}><span><b>${esc(d.internalName)}</b><br><small>${esc(d.originalName)} · ${esc(pmDocStatus(d))}${d.internal?' · Sensitive (excluded from binder by default)':''}</small></span></label>`).join('')||'<p>No documents yet.</p>'}</div>`;}
@@ -6322,12 +6406,12 @@
   function pmApplyZipFilters(){const form=document.querySelector('#pm-layer form[data-pm-form="editor"]');if(!form||pm.form?.kind!=='zip')return;const terms=(form.querySelector('[name="zipSearch"]')?.value||'').trim().toLowerCase().split(/\s+/).filter(Boolean);let shown=0;form.querySelectorAll('.pm-zip-option').forEach(el=>{el.hidden=terms.some(t=>!el.dataset.search.includes(t));if(!el.hidden)shown++;});const selected=Array.from(form.querySelectorAll('[name="zipDoc"]:checked'));pm.form.selectedIds=selected.map(el=>el.value);form.querySelector('#pm-zip-count').textContent=selected.length+' selected · '+shown+' matching documents (selection includes hidden checks)';}
   function pmDocOrder(d){const rows=pmRows();const link=d.links.find(l=>l.kind==='line');const sub=d.links.find(l=>l.kind==='sub');const payment=d.links.find(l=>l.kind==='payment');let id=link?.id;if(!id&&payment){const p=pmCF().schedules.find(p=>p.id===payment.id);id=p?.lineId||p?.allocations?.[0]?.lineId;}const r=rows.find(r=>r.line.id===id)||rows.find(r=>r.sub.id===sub?.id);return r?{rank:rows.indexOf(r),group:r.account.num+' '+r.account.name+' / '+r.sub.num+' '+r.sub.name}:{rank:999999,group:'Unassigned'};}
   async function pmBinder(){const b=active(),out=await pmTextPdf();out.text(b.title+' — Budget & Documents',20);out.text('Prepared '+new Date().toLocaleString()+' · Currency '+(b.currency||'USD'));out.text('Budget '+pmAmount(grandTotal())+' · Net paid '+pmAmount(grandTotalActual())+' · Hot Cost '+pmAmount(grandTotalEstFinal()));out.gap();orderedAccounts().forEach(a=>{out.text(a.num+' '+a.name+' — '+pmAmount(accountSubtotal(a)),14);a.subAccounts.forEach(s=>{out.text('  '+s.num+' '+s.name+' — '+pmAmount(subAccountTotal(s)),12);let segment=0;s.lines.forEach(l=>{if(l.kind==='subtotal'){out.text('Subtotal '+pmAmount(segment));segment=0;}else{const base=lineAmount(l),fr=pmCalc.fringe(l,base);segment+=base+fr;out.text((l.description||'Untitled line')+' | Qty '+l.qty+' '+unitDisplayValue(l)+' | X '+l.x+' | Rate '+l.rate+' | Budget '+pmAmount(base+fr));out.text('Vendor '+pmVendorLabel(l.vendorId)+' | Paid '+pmAmount(lineActualAmount(l)+lineFringeActualAmount(l))+' | Hot Cost '+pmAmount(lineEstimatedFinal(l)+lineFringeHotCost(l)));if(l.notes)out.text('Notes: '+l.notes);}});});});out.gap();out.text('Budget setup and reserves',14);out.text('Contingency '+(b.contingencyPercent||0)+'% · Reserve '+pmAmount(PC.reserve(b,pmCalc).total)+' · Allocated '+pmAmount(PC.reserve(b,pmCalc).allocated)+' · Remaining '+pmAmount(PC.reserve(b,pmCalc).remaining));if(b.locked)out.text('Locked original total: '+pmAmount(b.originalTotal||0));for(const [title,items] of [['Globals',b.globals||[]],['Units',b.units||[]],['Fringes',b.fringes||[]],['Groups',b.groups||[]]]){out.text(title,12);items.forEach(v=>out.text(v.name+' — '+(title==='Globals'?String(v.value??''):title==='Units'?(v.plural||''):title==='Fringes'?(v.type==='flat'?'Flat per line '+pmAmount(v.rate):String(v.rate)+'% of wages'):(v.color||''))));}out.newPage();out.text('Payment summary — full budget',18);pmExportRows(true).slice(1).forEach(r=>{out.text(r[0]+' | '+r[1]+' | '+r[2]+' | '+pmAmount(r[7]));out.text(r[3]+' | '+r[8]);});const docs=pmExportDocs().map(d=>({d,order:pmDocOrder(d)})).sort((a,b)=>a.order.rank-b.order.rank||a.d.internalName.localeCompare(b.d.internalName));out.newPage();out.text('Document index',18);const indexStart=out.pdf.getPageCount()-1;const indexEntries=[];let indexPage=out.pdf.getPages()[indexStart],iy=735;for(const item of docs){const label=item.order.group+' — '+item.d.internalName;const indexRecord={item,label};if(iy<50){indexPage=out.pdf.addPage([612,792]);iy=745;}indexRecord.indexPage=indexPage;indexRecord.iy=iy;iy-=36;indexEntries.push(indexRecord);}for(const entry of indexEntries){const d=entry.item.d,blob=await pmBlob(d),bytes=new Uint8Array(await blob.arrayBuffer());const firstPage=out.pdf.getPageCount()+1;out.newPage();out.text(entry.item.order.group,14);out.text(d.internalName,14);out.gap();out.text('Original: '+d.originalName);out.text('Tags: '+d.tags.join(', '));out.text('Assignments: '+d.links.map(pmDocLinkLabel).join('; '));entry.indexPage.drawText(entry.label.slice(0,85),{x:42,y:entry.iy,size:9,font:out.font});entry.indexPage.drawText('Starts page '+firstPage,{x:42,y:entry.iy-13,size:9,font:out.font});try{if(d.type==='application/pdf'||/\.pdf$/i.test(d.originalName)){const src=await PDFLib.PDFDocument.load(bytes);if(!src.getPageCount())throw Error('PDF has no pages');const pages=await out.pdf.copyPages(src,src.getPageIndices());pages.forEach(p=>out.pdf.addPage(p));}else if(/image\/(png|jpeg)/.test(d.type)||/\.(png|jpe?g)$/i.test(d.originalName)){const img=(d.type==='image/png'||/\.png$/i.test(d.originalName))?await out.pdf.embedPng(bytes):await out.pdf.embedJpg(bytes);const page=out.pdf.addPage([612,792]);const scale=Math.min(528/img.width,708/img.height);page.drawImage(img,{x:(612-img.width*scale)/2,y:(792-img.height*scale)/2,width:img.width*scale,height:img.height*scale});}else throw Error('Convert this original to PDF, PNG, or JPEG for a visible-page binder.');}catch(e){throw Error('Binder stopped at '+d.originalName+': '+e.message);}}const pages=out.pdf.getPages(),total=pages.length;pages.forEach((p,i)=>p.drawText('NO LONGER BUDGET · '+(i+1)+' / '+total,{x:12,y:12,size:7,font:out.font,color:PDFLib.rgb(.4,.4,.4)}));downloadBlob(buildExportFileName(b)+' Binder.pdf','application/pdf',await out.pdf.save());}
-  function pmSubmit(form){const d=new FormData(form),get=k=>String(d.get(k)||''),num=k=>PC.money(get(k)),f=pm.form;const type=form.dataset.pmForm;if(type==='line'){return pmCommit(()=>{const m=pmManage(pm.line),r=pmRow(pm.line);r.line.vendorId=get('vendorId');m.expectedBase=get('expectedBase')===''?null:num('expectedBase');m.expectedFringe=get('expectedFringe')===''?null:num('expectedFringe');m.reserveAllocation=num('reserveAllocation');if(m.expectedBase<0||m.expectedFringe<0||m.reserveAllocation<0)throw Error('Costs and reserve allocations cannot be negative.');const ex=PC.expected(active(),pm.line,pmCalc);if(m.reserveAllocation>ex.base+ex.fringe+.009)throw Error('Reserve funding cannot exceed this line’s expected base plus fringe cost.');});}
+  function pmSubmit(form){const d=new FormData(form),get=k=>String(d.get(k)||''),num=k=>PC.money(readFormAmount(get(k),form.querySelector('[name="'+k+'"]')?.getAttribute('aria-label')||k)),f=pm.form;const type=form.dataset.pmForm;if(type==='line'){return pmCommit(()=>{const m=pmManage(pm.line),r=pmRow(pm.line);r.line.vendorId=get('vendorId');m.expectedBase=get('expectedBase')===''?null:num('expectedBase');m.expectedFringe=get('expectedFringe')===''?null:num('expectedFringe');m.reserveAllocation=num('reserveAllocation');if(m.expectedBase<0||m.expectedFringe<0||m.reserveAllocation<0)throw Error('Costs and reserve allocations cannot be negative.');const ex=PC.expected(active(),pm.line,pmCalc);if(m.reserveAllocation>ex.base+ex.fringe+.009)throw Error('Reserve funding cannot exceed this line’s expected base plus fringe cost.');});}
  if(type==='timeline'){const saved=pmCommit(()=>{const cf=pmCF();for(const key of ['prepStart','prepEnd','prodStart','prodEnd','postStart','postEnd'])cf.phases[key]=get(key);for(const prefix of ['prep','prod','post'])if(cf.phases[prefix+'Start']&&cf.phases[prefix+'End']&&cf.phases[prefix+'Start']>cf.phases[prefix+'End'])throw Error('Each phase must end on or after its start.');cf.openingCash=num('openingCash');cf.openingDate=get('openingDate');cf.timelineSavedAt=new Date().toISOString();});if(saved){pm.timelineEditing=false;pm.notice='Timeline saved · '+new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});pmRender();}return saved;}
  if(!f)return;const p=f.value||{};const audit=['record','refund','reverse'].includes(f.kind);let createdVendorId='';const saved=pmCommit(()=>{const cf=pmCF();if(f.kind==='vendor'){if(!get('name').trim())throw Error('Vendor name is required.');const v={...p,id:p.id||pmId(),name:get('name').trim(),legalName:get('legalName'),contact:get('contact'),email:get('email'),phone:get('phone'),address:get('address'),terms:get('terms'),notes:get('notes'),archived:!!p.archived};createdVendorId=v.id;const list=pmVendors(),i=list.findIndex(x=>x.id===v.id);if(i<0)list.push(v);else list[i]=v;if(pm.line&&f.assign){pmManage(pm.line);pmRow(pm.line).line.vendorId=v.id;}}
  else if(f.kind==='milestone'){if(!get('name').trim())throw Error('Milestone name is required.');const v={id:p.id||pmId(),name:get('name').trim(),date:get('date')},i=cf.milestones.findIndex(x=>x.id===v.id);if(i<0)cf.milestones.push(v);else cf.milestones[i]=v;}
  else if(f.kind==='funding'){if(!get('source').trim())throw Error('Funding source is required.');if(num('received')>0&&!PC.validDate(get('receivedDate')))throw Error('Received funds require a received date.');if(num('expected')<0||num('received')<0)throw Error('Funding amounts cannot be negative.');const v={id:p.id||pmId(),source:get('source').trim(),expected:num('expected'),expectedDate:get('expectedDate'),received:num('received'),receivedDate:get('receivedDate'),note:get('note')},i=cf.funding.findIndex(x=>x.id===v.id);if(i<0)cf.funding.push(v);else cf.funding[i]=v;}
- else if(f.kind==='schedule'){const allocations=pmRows().map(r=>({lineId:r.line.id,base:num('base:'+r.line.id),fringe:num('fringe:'+r.line.id)})).filter(a=>a.base+a.fringe>0);const v={id:p.id||pmId(),label:get('label').trim(),mode:get('mode'),lineId:get('lineId'),component:get('component'),percent:Number(get('percent')),dateMode:get('dateMode'),due:get('due'),milestone:get('milestone'),offset:Number(get('offset')),note:get('note'),total:num('total'),allocations,cancelled:false};PC.validateSchedule(active(),v,pmCalc);const ids=v.mode==='fixed'?v.allocations.map(a=>a.lineId):[v.lineId];const selectedVendor=get('paymentVendorId');if(!pmVendor(selectedVendor))throw Error('Choose a vendor for this payment, or use Create vendor & use here.');ids.forEach(id=>{const r=pmRow(id);if(r.line.vendorId&&r.line.vendorId!==selectedVendor)throw Error((r.line.description||'This line')+' belongs to '+pmVendorLabel(r.line.vendorId)+'. Choose that vendor or change the line’s vendor first.');r.line.vendorId=selectedVendor;});v.vendorId=selectedVendor;ids.forEach(pmManage);const i=cf.schedules.findIndex(x=>x.id===v.id);if(i<0)cf.schedules.push(v);else cf.schedules[i]=v;}
+ else if(f.kind==='schedule'){const allocations=pmRows().map(r=>({lineId:r.line.id,base:num('base:'+r.line.id),fringe:num('fringe:'+r.line.id)})).filter(a=>a.base+a.fringe>0);const v={id:p.id||pmId(),label:get('label').trim(),mode:get('mode'),lineId:get('lineId'),component:get('component'),percent:readFormAmount(get('percent'),'Percentage'),dateMode:get('dateMode'),due:get('due'),milestone:get('milestone'),offset:readFormAmount(get('offset'),'Day offset'),note:get('note'),total:num('total'),allocations,cancelled:false};PC.validateSchedule(active(),v,pmCalc);const ids=v.mode==='fixed'?v.allocations.map(a=>a.lineId):[v.lineId];const selectedVendor=get('paymentVendorId');if(!pmVendor(selectedVendor))throw Error('Choose a vendor for this payment, or use Create vendor & use here.');ids.forEach(id=>{const r=pmRow(id);if(r.line.vendorId&&r.line.vendorId!==selectedVendor)throw Error((r.line.description||'This line')+' belongs to '+pmVendorLabel(r.line.vendorId)+'. Choose that vendor or change the line’s vendor first.');r.line.vendorId=selectedVendor;});v.vendorId=selectedVendor;ids.forEach(pmManage);const i=cf.schedules.findIndex(x=>x.id===v.id);if(i<0)cf.schedules.push(v);else cf.schedules[i]=v;}
  else if(f.kind==='record'){const live=cf.schedules.find(x=>x.id===p.id);if(!live)throw Error('Installment not found.');PC.record(active(),live,num('amount'),get('date'),pmCalc,f.postId,get('note'));}
  else if(f.kind==='refund'||f.kind==='reverse'){if(!get('note').trim())throw Error('Enter the reason/reference for this adjustment.');PC.adjustment(active(),p.id,f.kind==='refund'?'refund':'reversal',num('amount'),get('date'),f.postId,get('note'));}
  else if(f.kind==='doc'){const live=cf.documents.find(x=>x.id===p.id);if(!live)throw Error('Document not found.');live.internalName=get('internalName').trim();if(!live.internalName)throw Error('Give this document an internal name.');live.tags=get('tags').split(',').map(s=>s.trim()).filter(Boolean);live.internal=get('sharing')==='internal';live.links=d.getAll('link').map(s=>{const i=s.indexOf(':');return{kind:s.slice(0,i),id:s.slice(i+1)};});}
@@ -6352,7 +6436,7 @@
  },true);
   document.addEventListener('submit',async e=>{const form=e.target.closest('form[data-pm-form]');if(!form)return;e.preventDefault();e.stopImmediatePropagation();if(pm.busy)return;try{if(pm.form?.kind==='zip'){const ids=new FormData(form).getAll('zipDoc');if(!ids.length)throw Error('Select at least one document for the ZIP.');pm.busy=true;const btn=form.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Preparing ZIP…';await pmDocumentsZip(ids);pm.form=null;pm.notice='ZIP downloaded · '+ids.length+' documents';pmRender();}else pmSubmit(form);}catch(err){pmError(err);}finally{pm.busy=false;const btn=form.querySelector('button[type=submit]');if(btn){btn.disabled=false;if(pm.form?.kind==='zip')btn.textContent='Download selected ZIP';}}},true);
   document.addEventListener('change',async e=>{const t=e.target;if(!t.closest('#pm-layer'))return;e.stopImmediatePropagation();const name=t.name;if(name.startsWith('vendorsCol:')||name.startsWith('docsCol:')){const kind=name.split('Col:')[0],key=name.split('Col:')[1];const prop=kind==='vendors'?'vendorColumns':'docColumns';(pm[prop]||(pm[prop]={}))[key]=t.value;pmApplyLibraryFilters(kind);}else if(name==='zipDoc'){pmApplyZipFilters();}else if(['mode','dateMode'].includes(name)){pmModeFields();}else if(name==='paymentVendorId'){if(pm.form)pm.form.vendorChanged=true;}else if(name==='lineId'){const field=t.form.querySelector('[name="paymentVendorId"]');if(field&&!pm.form?.vendorChanged)field.value=pmRow(t.value)?.line.vendorId||'';}else if(name.startsWith('docAssign')){pmApplyDocFilters();}else if(name==='filterAccount'){pm.account=t.value;pm.sub='';pm.line='';pmRender();}else if(name==='filterSub'){pm.sub=t.value;pm.line='';pmRender();}else if(name==='filterVendor'){pm.vendor=t.value;pm.line='';pmRender();}else if(name==='pickLine'){pm.line=t.value;pmRender();}else if(name==='calendarMonth'){pm.month=t.value;pmRender();}else if(name==='includePaid'){pm.paid=t.checked;pmRender();}else if(t.id==='pm-upload')await pmUpload(Array.from(t.files||[]));},true);
-  document.addEventListener('input',e=>{const t=e.target;if(!t.closest('#pm-layer'))return;e.stopImmediatePropagation();if(pm.form?.kind==='schedule'&&/^(base:|fringe:)/.test(t.name)&&!pm.form.vendorChanged){const field=t.form.querySelector('[name="paymentVendorId"]');if(field&&!field.value){const ids=pmRows().filter(r=>PC.money(t.form.querySelector('[name="base:'+r.line.id+'"]')?.value)+PC.money(t.form.querySelector('[name="fringe:'+r.line.id+'"]')?.value)>0).map(r=>r.line.vendorId).filter(Boolean);if(ids.length&&new Set(ids).size===1&&Array.from(field.options).some(o=>o.value===ids[0]))field.value=ids[0];}}if(t.name==='docAssignSearch'){pmApplyDocFilters();return;}if(t.name==='zipSearch'){pmApplyZipFilters();return;}if(t.name.startsWith('vendorsCol:')||t.name.startsWith('docsCol:')){const kind=t.name.split('Col:')[0],prop=kind==='vendors'?'vendorColumns':'docColumns';(pm[prop]||(pm[prop]={}))[t.name.split('Col:')[1]]=t.value;pmApplyLibraryFilters(kind);return;}if(t.name==='vendorSearch'){pm.vendorQuery=t.value;pmApplyLibraryFilters('vendors');}if(t.name==='docSearch'){pm.docQuery=t.value;pmApplyLibraryFilters('docs');}},true);
+  document.addEventListener('input',e=>{const t=e.target;if(!t.closest('#pm-layer'))return;e.stopImmediatePropagation();if(pm.form?.kind==='schedule'&&/^(base:|fringe:)/.test(t.name)&&!pm.form.vendorChanged){const field=t.form.querySelector('[name="paymentVendorId"]');if(field&&!field.value){const ids=pmRows().filter(r=>PC.money(amountNumber(t.form.querySelector('[name="base:'+r.line.id+'"]')?.value))+PC.money(amountNumber(t.form.querySelector('[name="fringe:'+r.line.id+'"]')?.value))>0).map(r=>r.line.vendorId).filter(Boolean);if(ids.length&&new Set(ids).size===1&&Array.from(field.options).some(o=>o.value===ids[0]))field.value=ids[0];}}if(t.name==='docAssignSearch'){pmApplyDocFilters();return;}if(t.name==='zipSearch'){pmApplyZipFilters();return;}if(t.name.startsWith('vendorsCol:')||t.name.startsWith('docsCol:')){const kind=t.name.split('Col:')[0],prop=kind==='vendors'?'vendorColumns':'docColumns';(pm[prop]||(pm[prop]={}))[t.name.split('Col:')[1]]=t.value;pmApplyLibraryFilters(kind);return;}if(t.name==='vendorSearch'){pm.vendorQuery=t.value;pmApplyLibraryFilters('vendors');}if(t.name==='docSearch'){pm.docQuery=t.value;pmApplyLibraryFilters('docs');}},true);
   document.addEventListener('keydown',e=>{const layer=document.getElementById('pm-layer');if(!layer||layer.hidden)return;if(e.key==='Escape'){const confirm=document.getElementById('confirm-modal');if(confirm?.classList.contains('open'))return;e.preventDefault();e.stopImmediatePropagation();if(pm.form){pm.form=pm.form.returnTo||null;pmRender();}else pmClose();return;}if(e.key==='Tab'){const nodes=Array.from(layer.querySelectorAll('button,input,select,textarea,a')).filter(el=>!el.disabled&&el.getClientRects().length);const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
  if(e.target.closest('#pm-layer')&&(e.metaKey||e.ctrlKey)&&['n','f','e','m','z','y'].includes(e.key.toLowerCase())){e.preventDefault();e.stopImmediatePropagation();}
  },true);
@@ -6394,7 +6478,7 @@
   HELP_SECTIONS.push({title:'Vendors, payment schedules & paid Actuals',body:'<p>Use <b>Setup → Vendors</b> for a reusable contact book (including crew and reimbursement recipients). Select row text to copy contact details. Search or filter each data column; Attached / Not Attached is scoped to the current budget. Archived vendors appear below the Archive divider and can be unarchived without losing budget links. In a detail line’s row menu, choose <b>Vendor &amp; Payments</b>; assign a vendor and approve expected base/fringe costs if they differ from budget. <b>Save line setup</b> stores those choices; <b>Add payment…</b> also saves pending line choices before opening the schedule. Blank approved costs follow the budget.</p><p>Add fixed, percentage, or remaining-balance installments. In the schedule, choose <b>Vendor for this payment</b> or <b>Create vendor &amp; use here…</b>; vendor creation returns to your draft without losing amounts/dates. Click <b>Save payment schedule</b> to finish. Fields that do not apply to the chosen amount/date type are disabled, with hover explanations. Fixed shared payments split base/fringe allocations across lines belonging to one vendor; allocations must match the total. Fringes can follow the base payment or be scheduled separately. <b>Record paid</b> explicitly posts paid amounts/date to Actuals, including partial payments. Hot Cost retains remaining expected cost, so a deposit does not look like savings. <b>Finalize cost</b> confirms nothing further is owed; reopen if more cost arises. Corrections reverse mistaken postings; refunds are actual incoming cash and reduce net paid Actuals. Both retain history. Posted payments cannot be erased through Undo or row deletion.</p>'});
   HELP_SECTIONS.push({title:'Production timeline, cash flow & calendar exports',body:'<p><b>Setup → Timeline &amp; Funding</b> sets phase dates, custom milestones, opening cash/as-of date, and expected/received funding. <b>Save timeline</b> switches phase/cash fields to a saved read-only summary; <b>Edit timeline</b> makes them editable again. Save status stays visible at the workspace’s top. Unpaid milestone-relative installments move with their milestone; fixed dates and historical paid dates do not move. An undated installment stays Not scheduled yet.</p><p><b>Payments &amp; Timeline</b> provides payment lists, calendar, and budget-wide cash forecast. Contingency remains a separate reserve, not dated spending. A line’s approved reserve allocation reduces the remaining reserve without adding a second cash payment. Cash movements before the opening-date cutoff are already represented by opening cash.</p><p>Export payment PDF/Excel/CSV, a printable month calendar, or a calendar file. Create a dedicated calendar in Apple/Google Calendar and import the file; for updates, delete the old dedicated calendar and import the new snapshot into a newly created one. There is no ongoing sync and the app does not create/delete external calendars.</p>'});
   HELP_SECTIONS.push({title:'Document library, full backups & PDF binders',body:'<p><b>Setup → Documents</b> accepts documents before or after payments are assigned. Preserve original names; set internal names, tags, multiple line/sub-account/payment links, and Export privacy defaults. There is no online sharing: Export privacy only determines default binder inclusion. Filter each library data column; Assigned/Unassigned refers to document links, and Archived entries appear below the Archive divider. Archive/Unarchive preserves originals and assignments. In <b>Edit details</b>, search by account number/name, line, vendor or payment and filter by Account, Sub-account and Assignment type. Filtered-out checked assignments remain selected when saved. New uploads default to Internal. Upload/assignment alone changes no costs. Original files live in local document storage, not the smaller budget-settings storage.</p><p><b>Export &amp; Share → Payments, documents &amp; binder</b> opens scoped reports. Sensitive documents are excluded from binder exports unless explicitly included. <b>Download ZIP…</b> opens a chooser for individual files or all documents, including sensitive/archived originals only when explicitly checked. Searching the ZIP chooser preserves hidden checked items. A full .nlb backup includes all attached files and referenced vendor records, including Internal documents—treat that backup as sensitive. Import restores those originals on another computer.</p><p>The PDF binder includes the budget, payment summary, index, and full visible PDF/PNG/JPEG pages grouped by account/sub-account. Missing, encrypted, or unsupported documents stop the binder with an error rather than disappearing silently. Download other originals individually or in ZIP; convert them to PDF/PNG/JPEG before adding them visibly to the binder. Per-document upload limit: 100 MB. Local storage may also limit total capacity; keep external full backups.</p>'});
-  function pmCaptureSchedule(form){const value=k=>form.querySelector('[name="'+k+'"]')?.value||'';return{...pm.form.value,label:value('label'),paymentVendorId:value('paymentVendorId'),mode:value('mode'),lineId:value('lineId'),component:value('component'),percent:Number(value('percent')),dateMode:value('dateMode'),due:value('due'),milestone:value('milestone'),offset:Number(value('offset')),note:value('note'),total:PC.money(value('total')),allocations:pmRows().map(r=>({lineId:r.line.id,base:PC.money(value('base:'+r.line.id)),fringe:PC.money(value('fringe:'+r.line.id))})).filter(a=>a.base+a.fringe>0)};}
+  function pmCaptureSchedule(form){const value=k=>form.querySelector('[name="'+k+'"]')?.value||'';return{...pm.form.value,label:value('label'),paymentVendorId:value('paymentVendorId'),mode:value('mode'),lineId:value('lineId'),component:value('component'),percent:readFormAmount(value('percent'),'Percentage'),dateMode:value('dateMode'),due:value('due'),milestone:value('milestone'),offset:readFormAmount(value('offset'),'Day offset'),note:value('note'),total:PC.money(readFormAmount(value('total'),'Total')),allocations:pmRows().map(r=>({lineId:r.line.id,base:PC.money(readFormAmount(value('base:'+r.line.id),'Base allocation')),fringe:PC.money(readFormAmount(value('fringe:'+r.line.id),'Fringe allocation'))})).filter(a=>a.base+a.fringe>0)};}
   function pmDocAssignments(doc){const options=[];const add=(kind,id,label,accounts,subs,search)=>options.push(`<label class="pm-assignment-option" data-kind="${kind}" data-accounts="${esc(JSON.stringify(accounts))}" data-subs="${esc(JSON.stringify(subs))}" data-search="${esc(search.toLowerCase())}"><input type="checkbox" name="link" value="${kind}:${esc(id)}"${doc.links.some(l=>l.kind===kind&&l.id===id)?' checked':''}><span>${esc(label)}</span></label>`);
  pmRows().forEach(r=>add('line',r.line.id,'Line: '+pmLabel(r.line.id),[r.account.id],[r.sub.id],[r.account.num,r.account.name,r.sub.num,r.sub.name,r.line.description,pmVendorLabel(r.line.vendorId)].join(' ')));
  active().accounts.forEach(a=>a.subAccounts.forEach(sub=>add('sub',sub.id,'Sub-account: '+a.num+' / '+sub.num+' '+sub.name,[a.id],[sub.id],[a.num,a.name,sub.num,sub.name].join(' '))));
