@@ -41,7 +41,7 @@ async function showManualUpdateGuide(version) {
       detail: [
         'Updates are installed manually for now. Nothing will download or restart automatically.',
         '',
-        '1. Back up each important budget: Export & Share → Export .nlb.',
+        '1. Keep an external full backup: Export & Share → Export .nlb for one budget, or Downloads → Back up all budgets & contacts… for the entire workspace.',
         '2. Click Open Download Page below. Under Assets, download the arm64.dmg installer (Apple Silicon Macs only).',
         '3. When the download finishes, quit NO LONGER BUDGET with Cmd+Q.',
         '4. Open the .dmg, drag NO LONGER BUDGET into Applications, and choose Replace. Do not delete the app’s data or use an uninstaller.',

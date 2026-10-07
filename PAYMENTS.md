@@ -1,74 +1,20 @@
-# Payments, timeline and documents (v1.9.1 beta)
+# Payments, timeline and documents — v1.10.0
 
-## Start here
-1. Build your budget normally: Top Sheet → Account → Sub-account → detail lines. Keep different vendors on separate lines.
-2. Open Setup → Timeline & Funding to set optional phase/milestone dates and opening cash; add funding tranches with expected and received amounts/dates.
-3. In a detail line's drag-handle menu choose Vendor & Payments. Select/create a vendor. Vendors are reused across budgets on this computer.
-4. Blank approved-cost fields follow the budget. Explicitly approve a changed base/fringe expected cost after reviewing an invoice/quote. An upload does not approve/post money.
-5. Add a Fixed, Percentage, or Remaining balance installment. Use Base + fringes together by default, or separate components. Fixed shared payments must split their total across lines belonging to one vendor; allocation amounts must sum to the total.
-6. Set a fixed due date or a milestone plus day offset. Unpaid relative dates follow milestone changes; fixed and paid dates remain unchanged.
-7. Record paid explicitly, entering actual paid date and amount. Partial payments are supported and allocated proportionally to the installment's remaining components. Paid Actuals change only through an explicit financial action; uploading an invoice is not payment.
-8. Hot Cost on managed lines retains paid + remaining expected cost. A deposit is not a saving. Finalize only when nothing further is owed; reopen if more cost is expected. Overpaid/overallocated expected costs are flagged.
-9. Correct mistaken postings with a reversal; record real cash returned as a refund. Original records remain. Posted history cannot be removed via Undo or row deletion.
+See [the current user guide](USER_GUIDE.md) for Quick start, task guides, FAQ, closeout, backup and troubleshooting instructions. This replaces the old release-by-release instruction appendices.
 
-## Cash flow and calendars
-The $ toolbar button or Setup → Payments & Timeline opens the workspace. Cash Flow is budget-wide. Opening cash is inclusive of movements on/after its as-of date; earlier movements are already represented by opening cash. Expected funding is distinguished from actually received funding. Refunds are separate from funding.
+## Financial rules
+- Budget estimates remain separate from confirmed/expected costs. Actuals are paid ledger amounts minus received refunds/corrections, including preserved legacy opening values.
+- Invoices, uploads, assignments and payment plans do not post paid money.
+- Shared invoice allocations and base/fringe components roll up once. Invoice/planned obligations must not be duplicated.
+- Receipt skipping is explicit; missing evidence and expected refunds block line closure.
+- Received refunds do not reopen settled purchases, including fully refunded purchases at zero net Actuals.
+- Posted records retain original history; use corrections, not Undo, for financial changes.
 
-Unallocated costs and installments lacking a due date stay Not scheduled yet. Contingency is a reserve, not invented dated spending. A line's reserve-funded allocation reduces the remaining reserve, capped at the line's remaining/paid expected cost, without creating a second cash payment.
+## Storage and portability
+- Current desktop storage is local, not native .nlb autosave or cloud sync.
+- Full budget backups include originals and referenced vendors. Whole-workspace backups include every budget, folder and vendor, including unassigned/archived contacts. Workspace import is additive with confirmation; malformed/missing-file backups stop before state changes.
+- Duplicates preserve financial history but copy document originals into independent storage. Old shared-key duplicates also cannot lose originals through another budget’s document removal.
+- Reports, calendar snapshots and binders are not restorable backups. Export privacy is a local binder default, not online access control.
 
-Calendar view and PDF show dated outgoing/incoming items. In **Downloads**, choose One calendar month or From / To dates (inclusive) for PDF and .ics. Calendar view’s download buttons use its displayed month; Custom date range… opens Downloads. Payment Account/Sub-account/Vendor filters prorate outgoing allocations, while incoming funding remains budget-wide. Paid payments/refunds/received funding are opt-in. Undated items remain Not scheduled yet. Export .ics as a snapshot: create a dedicated destination calendar in Apple/Google Calendar and import it. For a new snapshot, delete the old dedicated calendar and import into a new one. No live sync; the app never creates/deletes external calendars.
-
-## Documents and backups
-Setup → Documents allows upload first/assignment later, original download, internal names/tags, multiple line/sub-account/payment assignments, and PDF/supported-image previews. Filter each data column and use Assigned / Unassigned / Archived statuses. Archive is reversible organization: originals, links, backup inclusion and existing binder privacy defaults are preserved. New uploads default to Exclude from binder by default (sensitive) under Export privacy. This is a local export preference, not online sharing/access control. Binder exports exclude those sensitive files unless explicitly included. Download ZIP… opens a chooser for individual originals, Select matching, or Select all documents; any sensitive/archived file may be included when explicitly checked. Search does not discard hidden checked files. A full .nlb backup includes all originals, including sensitive/archived documents, and referenced vendors only; treat backups as sensitive.
-
-Original bytes live locally in IndexedDB, separate from small budget settings. Do not clear the app's storage. Export external full backups regularly. Importing a full .nlb on another computer restores the original files and referenced vendors as a new budget. Invalid/missing-file backups stop instead of creating incomplete records. The document upload limit is 100 MB/file; device storage and memory also limit capacity.
-
-Export payment PDF/.xlsx/CSV by account/sub-account/vendor/line. Exports are snapshots with typed record/status columns, not a live spreadsheet model. The full binder includes all budget lines/setup, a whole-budget payment summary, document index and visible document pages grouped by account/sub-account. PDF, PNG and JPEG originals merge visibly. Other original formats can be downloaded in ZIP but must be converted before binder export. Encrypted, unsupported or missing binder documents produce an error, never silent omission.
-
-## Compatibility and validation
-No destructive reset or legacy reconciliation. Actuals are now read-only on every detail line. Previous manual values are preserved as labeled legacy opening balances, not invented dated payments. New values come only from explicit paid/refund/correction records; closure requires reviewing nonzero legacy opening amounts. The in-app Help guide includes the new workflow. Local Chromium tests cover financial rules, shared payments, partial settlement, corrections/refunds, relative dates, file:// startup, original-file backup/restore, CSV/Excel/PDF/ICS/ZIP/binder outputs and existing budgeting regressions. Live Mac installation and Apple/Google calendar import still require verification. Updates remain guided manual installations; v1.5.3 is the rollback release.
-
-## v1.6.1 interface fixes
-- Calendar-picker icons match date-input text in dark/light mode. All top-right close controls use the same size/style.
-- Save timeline displays a read-only summary and visible header save status; Edit timeline restores inputs. Cancel discards unsaved edits.
-- Labels and inputs have consistent gaps; editor actions occupy a separate row, never covering scrolling fields. Document toolbar controls align and Search documents is visibly labeled.
-- Inapplicable amount/date fields are disabled, skipped by keyboard navigation, and have hover explanations. Managed Actuals cannot be edited directly; use paid postings/corrections.
-- Document assignments have text, account, sub-account and type filters. Hidden checked items remain selected, and filtering does not discard unsaved document names/tags.
-- Tooltips are clamped to the viewport.
-- Schedules now show Vendor for this payment and Create vendor & use here. Creating/canceling a vendor returns to the intact schedule draft. Adding a payment from a line saves pending line setup first; fixed-allocation rows can infer their single existing vendor. Save payment schedule explicitly commits assignments; mismatched vendor allocations produce a clear error.
-
-## v1.7.0 Vendors and Documents refinements
-- Vendor table text is selectable/copyable, including contacts, phone/email, addresses and notes. Attachment status is scoped to the selected budget: Attached (green), Not Attached (yellow), or Archived (yellow). Archives remain below an Archive divider and preserve existing budget/payment links. Filter Vendor, Contact, Terms/notes and Status independently; filters combine with global search.
-- Documents show Assigned (green), Unassigned (yellow), or Archived (red). Archive/Unarchive preserves original files, names/tags and assignments; archived entries stay below an Archive divider. Row actions are left-aligned. Every data column has a filter; the old Unassigned only checkbox and Sharing column are removed.
-- Sharing was never an external link or online service. The existing internal flag is relabeled Export privacy in document details, preserving default binder inclusion behavior. ZIP download now requires explicit file selection rather than silently omitting sensitive originals.
-- Upload Documents… opens the native chooser. Preview’s Close preview control is in the workspace’s upper-right corner and returns to the library. ZIP selection includes a searchable list, individual checkboxes, all/matching selection and Clear selection; the downloaded index includes document status/privacy metadata.
-
-## v1.7.2 input and fringe fixes
-- Return on the physical last regular detail line appends a new regular line and focuses the same column. Existing down/up navigation and expanded editors work; a trailing subtotal is not ignored. The insertion is undoable/redoable.
-- Numeric budget fields, globals/formulas and payment amounts accept US-style thousands grouping (1,250.50). Payment forms validate formatted amounts, preserve their minimum/maximum/step constraints, and reject malformed grouping without posting changes. Numeric formulas normalize literal leading zeros rather than interpreting them as octal.
-- QTY/X remove leading zeros when committed, including when Return moves away; zero, decimals and negative numbers retain their meaning. Global expressions remain editable.
-- Applied fringes appear immediately, including zero-rate/zero-amount definitions. Detail breakdown rows update as amounts or fringe rates/types change, without navigating away or rebuilding focused line inputs.
-- Checkbox pointer selection no longer outlines the containing row/cell. Checkbox sizing is fixed; keyboard focus remains visible around the checkbox itself.
-
-
-## v1.8.0 Downloads and full example
-- **Downloads** replaces the payment workspace’s Exports tab throughout navigation and Help. Main budget **Export & Share** stays unchanged; its **Payment & document downloads** shortcut opens Downloads directly.
-- Five clear sections: Payment reports, Payment calendar, Document files, Full budget binder, Full budget backup. Payment scope explains Account (Top Sheet), Sub-account and Vendor. Reports include all dates; calendar downloads alone use the date selection. ZIP has its own document chooser; binder/backup remain whole-budget.
-- Calendar PDF and .ics use the same inclusive dates, scope and history setting. Custom ranges span months/years; PDF has one grid page per touched month, shaded excluded days and additional detail pages for overflow. Invalid/reversed ranges stop with visible feedback. Empty ranges produce a calendar with no events rather than inventing dates. PDF ranges are limited to 10 years; .ics allows longer ranges. Snapshots remain import-once, not live sync.
-- Scoped consistent field spacing, padded dropdown arrows, checkbox/label alignment, 44px download controls and responsive layouts. Sensitive binder consent survives rerenders and defaults off on workspace opening.
-- Fresh **Trial by Software** budgets include nine schedules (fixed/shared/percentage/remaining, relative/fixed/undated, and cancelled), five paid/refund ledger records, a finalized line, a revised approved cost, separate fringes, reserve allocation, three production phases, custom milestone, opening cash, received/expected/undated funding, six fictional vendor contacts, and six offline PDF/image originals. Three documents are assigned, two unassigned, one archived; two have sensitive privacy defaults. Uploading/assignment never posts Actuals.
-- **Help → Load full example budget** creates a new full sandbox. Existing budgets and older examples are not overwritten. Fresh examples use unique document keys; normal reload preserves edits, removals and archives. The example starts prep two months before creation, has historical paid records and upcoming post milestones. All identities/files are fictional and visibly labeled.
-- Full backups still include all originals and linked vendors; unlinked contact-book entries are not exported as budget vendor references.
-
-
-## v1.9.1 Cost lifecycle
-- Each detail line opens a dedicated Payments page via its six-dot menu or the clickable currency sign beside Total. Overview lists lines by stage; parent account/sub-account pages manage defaults and shared invoices.
-- Estimated → Confirmed → Invoiced → Partially paid → Paid → Closed is calculated from the ledger/expected cost. Original budget amounts remain unchanged. Confirm cost retains a dated decision history. Closure requires nothing owed, no outstanding expected refund and no missing payment receipts. Finalize cost is separate and cannot bypass unpaid invoices.
-- Vendor / crew member and optional Paid through are inherited account → sub-account → line. Explicit direct payment overrides a parent payroll company. Historical payment recipients remain stored on posted records. Parent invoices allocate exact-cent base/fringe totals proportionally, equally or manually; children show their shares, never repeated whole-invoice costs.
-- Invoice/reference, category, recipient, dates, note and supporting documents are entered manually. Optional employer tax, pension/health, processing-fee and other fringe breakdown describes the fringe total, not extra charges. Employee deductions are within gross wages. Duplicate invoice references per recipient are rejected. Link an existing plan to avoid duplicate obligations; blank due date preserves a linked plan’s milestone timing.
-- Record payment requires a selected/uploaded receipt or explicit Skip receipt for now (unchecked initially). Partial payments are supported. Missing receipts can be attached later; evidence cannot be permanently deleted while referenced by a posted payment, but can be archived. Uploading keeps the intact form draft and never posts money.
-- Record payment without invoice supports Paid directly or Reimburse someone, merchant vs reimbursement recipient, base/fringe amounts, paid date and optional note. Actuals are ledger-only; existing manual Actuals survive as legacy opening values for review.
-- Expected returns/refundable deposits are forecast incoming cash and block closure, not payment. Record actual refund selects an original outgoing payment and affects only the relevant line of a shared payment, within the unadjusted cap. Received cost refunds reduce net expected cost by their recorded base/fringe amounts. Settled invoices/purchases do not reopen because of a refund. Historical corrections remain auditable.
-- Yellow currency sign means an invoiced line still owes money; green means fully paid/closed, including Paid with receipt/refund follow-up. Only the sign changes color. Parent signs aggregate their children. Amount digits and Rate sign remain unchanged. Scrollbars use consistent theme-matched styling.
-- Documents can link to invoices and accounts in addition to lines/sub-accounts/plans. Full portable backups retain allocations, all referenced parties (including payroll companies, merchants and reimbursement recipients), receipt originals, expected/received refund history and cost decisions. Validation rejects mismatched invoice allocations, missing evidence references and inconsistent cost-refund history before import. Payment reports include invoice/lifecycle, recipient, merchant and receipt status; the full binder includes those payment details and supporting originals.
-- Fresh Trial by Software examples include structured invoices, payment evidence and an expected refund. Existing samples/budgets are never reseeded. Assisted document reading remains a future roadmap item.
+## Verification boundary
+Automated browser/financial/backup/layout checks are supplemented by published-package verification. Native Mac installation/printing and Apple/Google calendar imports need real-device verification. No bank integration, payroll engine, automatic document reading, external online sharing or live sync is implemented.
