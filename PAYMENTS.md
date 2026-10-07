@@ -1,4 +1,4 @@
-# Payments, timeline and documents (v1.9.0 beta)
+# Payments, timeline and documents (v1.9.1 beta)
 
 ## Start here
 1. Build your budget normally: Top Sheet → Account → Sub-account → detail lines. Keep different vendors on separate lines.
@@ -61,7 +61,7 @@ No destructive reset or legacy reconciliation. Actuals are now read-only on ever
 - Full backups still include all originals and linked vendors; unlinked contact-book entries are not exported as budget vendor references.
 
 
-## v1.9.0 Cost lifecycle
+## v1.9.1 Cost lifecycle
 - Each detail line opens a dedicated Payments page via its six-dot menu or the clickable currency sign beside Total. Overview lists lines by stage; parent account/sub-account pages manage defaults and shared invoices.
 - Estimated → Confirmed → Invoiced → Partially paid → Paid → Closed is calculated from the ledger/expected cost. Original budget amounts remain unchanged. Confirm cost retains a dated decision history. Closure requires nothing owed, no outstanding expected refund and no missing payment receipts. Finalize cost is separate and cannot bypass unpaid invoices.
 - Vendor / crew member and optional Paid through are inherited account → sub-account → line. Explicit direct payment overrides a parent payroll company. Historical payment recipients remain stored on posted records. Parent invoices allocate exact-cent base/fringe totals proportionally, equally or manually; children show their shares, never repeated whole-invoice costs.
