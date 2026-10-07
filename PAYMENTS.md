@@ -1,4 +1,4 @@
-# Payments, timeline and documents (v1.7.2 beta)
+# Payments, timeline and documents (v1.8.0 beta)
 
 ## Start here
 1. Build your budget normally: Top Sheet → Account → Sub-account → detail lines. Keep different vendors on separate lines.
@@ -16,7 +16,7 @@ The $ toolbar button or Setup → Payments & Timeline opens the workspace. Cash 
 
 Unallocated costs and installments lacking a due date stay Not scheduled yet. Contingency is a reserve, not invented dated spending. A line's reserve-funded allocation reduces the remaining reserve, capped at the line's remaining/paid expected cost, without creating a second cash payment.
 
-Calendar view and PDF show dated outgoing/incoming items. Export .ics as a snapshot: create a dedicated destination calendar in Apple/Google Calendar and import it. For a new snapshot, delete the old dedicated calendar and import into a new one. No live sync; the app never creates/deletes external calendars.
+Calendar view and PDF show dated outgoing/incoming items. In **Downloads**, choose One calendar month or From / To dates (inclusive) for PDF and .ics. Calendar view’s download buttons use its displayed month; Custom date range… opens Downloads. Payment Account/Sub-account/Vendor filters prorate outgoing allocations, while incoming funding remains budget-wide. Paid payments/refunds/received funding are opt-in. Undated items remain Not scheduled yet. Export .ics as a snapshot: create a dedicated destination calendar in Apple/Google Calendar and import it. For a new snapshot, delete the old dedicated calendar and import into a new one. No live sync; the app never creates/deletes external calendars.
 
 ## Documents and backups
 Setup → Documents allows upload first/assignment later, original download, internal names/tags, multiple line/sub-account/payment assignments, and PDF/supported-image previews. Filter each data column and use Assigned / Unassigned / Archived statuses. Archive is reversible organization: originals, links, backup inclusion and existing binder privacy defaults are preserved. New uploads default to Exclude from binder by default (sensitive) under Export privacy. This is a local export preference, not online sharing/access control. Binder exports exclude those sensitive files unless explicitly included. Download ZIP… opens a chooser for individual originals, Select matching, or Select all documents; any sensitive/archived file may be included when explicitly checked. Search does not discard hidden checked files. A full .nlb backup includes all originals, including sensitive/archived documents, and referenced vendors only; treat backups as sensitive.
@@ -49,3 +49,13 @@ No destructive reset or legacy reconciliation. Unmanaged manual Actuals retain t
 - QTY/X remove leading zeros when committed, including when Return moves away; zero, decimals and negative numbers retain their meaning. Global expressions remain editable.
 - Applied fringes appear immediately, including zero-rate/zero-amount definitions. Detail breakdown rows update as amounts or fringe rates/types change, without navigating away or rebuilding focused line inputs.
 - Checkbox pointer selection no longer outlines the containing row/cell. Checkbox sizing is fixed; keyboard focus remains visible around the checkbox itself.
+
+
+## v1.8.0 Downloads and full example
+- **Downloads** replaces the payment workspace’s Exports tab throughout navigation and Help. Main budget **Export & Share** stays unchanged; its **Payment & document downloads** shortcut opens Downloads directly.
+- Five clear sections: Payment reports, Payment calendar, Document files, Full budget binder, Full budget backup. Payment scope explains Account (Top Sheet), Sub-account and Vendor. Reports include all dates; calendar downloads alone use the date selection. ZIP has its own document chooser; binder/backup remain whole-budget.
+- Calendar PDF and .ics use the same inclusive dates, scope and history setting. Custom ranges span months/years; PDF has one grid page per touched month, shaded excluded days and additional detail pages for overflow. Invalid/reversed ranges stop with visible feedback. Empty ranges produce a calendar with no events rather than inventing dates. PDF ranges are limited to 10 years; .ics allows longer ranges. Snapshots remain import-once, not live sync.
+- Scoped consistent field spacing, padded dropdown arrows, checkbox/label alignment, 44px download controls and responsive layouts. Sensitive binder consent survives rerenders and defaults off on workspace opening.
+- Fresh **Trial by Software** budgets include nine schedules (fixed/shared/percentage/remaining, relative/fixed/undated, and cancelled), five paid/refund ledger records, a finalized line, a revised approved cost, separate fringes, reserve allocation, three production phases, custom milestone, opening cash, received/expected/undated funding, six fictional vendor contacts, and six offline PDF/image originals. Three documents are assigned, two unassigned, one archived; two have sensitive privacy defaults. Uploading/assignment never posts Actuals.
+- **Help → Load full example budget** creates a new full sandbox. Existing budgets and older examples are not overwritten. Fresh examples use unique document keys; normal reload preserves edits, removals and archives. The example starts prep two months before creation, has historical paid records and upcoming post milestones. All identities/files are fictional and visibly labeled.
+- Full backups still include all originals and linked vendors; unlinked contact-book entries are not exported as budget vendor references.
