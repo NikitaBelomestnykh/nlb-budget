@@ -225,6 +225,12 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  app.setAboutPanelOptions({
+    applicationName: 'NO LONGER BUDGET',
+    applicationVersion: app.getVersion(),
+    copyright: 'No Longer Network',
+    credits: 'Buy the developers a coffee\n\nNO LONGER BUDGET is built to make production budgeting a little easier. If it’s helped you and your budget allows, add an extra coffee to your crafty line for us.\n\nSupport is appreciated, but never expected. Contribute once, regularly, or never—the app works exactly the same either way.\n\nNot active at the moment',
+  })
   createWindow()
 
   app.on('activate', () => {

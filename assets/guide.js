@@ -1,4 +1,4 @@
-/* Current user guide. No historical workflow appendices. */
+/* Current user guide. */
 window.NLBGuide = [
   {
     "group": "Quick start",
@@ -111,6 +111,11 @@ window.NLBGuide = [
     "body": "<p>View version in <b>NO LONGER BUDGET → About</b>. Check for Updates… / How to Update… use guided manual installation, not automatic download/restart.</p><ol><li>Create external full backups of important budgets—or all budgets and contacts.</li><li>Download the release’s <b>arm64.dmg</b> for Apple Silicon Mac.</li><li>Quit with Cmd+Q, open the DMG, drag the app to Applications and choose Replace.</li><li>Reopen from Applications; check About, budgets, payment history and document previews.</li></ol><p>Replacing the application is intended to preserve local data. Do not clear app storage, use an uninstaller or disable macOS security. If blocked, use System Settings → Privacy &amp; Security → Open Anyway if offered. Native Mac installation still requires a real-device check.</p>"
   },
   {
+    "group": "How-to guides",
+    "title": "Breadcrumbs, Back / Forward and vendor defaults",
+    "body": "<p>The Payments &amp; Timeline workspace shows your budget, section and deeper account/sub-account/line or editor in clickable breadcrumbs. Click an ancestor to return up a level. Back / Forward arrows revisit spaces during this open workspace, including document previews and vendor/document editors. History resets when the workspace closes or the budget changes.</p><p>Unposted editor drafts are kept in this temporary history; navigating does not save a cost or post money. A successfully saved/cancelled editor is not restored as a new financial posting. Document preview URLs are recreated on return. Uploaded originals remain in the library even if an invoice draft is not saved.</p><p>Parent <b>Default vendor &amp; payroll company</b> panels start collapsed; click their heading to review/edit defaults. Payment-list PDFs use alternating record backgrounds and separators; the budget PDF, binder and calendar layouts are unchanged.</p>"
+  },
+  {
     "group": "FAQ & troubleshooting",
     "title": "What do the stages and yellow/green signs mean?",
     "body": "<p>Estimated means not confirmed/invoiced/paid yet. Confirmed means cost/vendor reviewed. Invoiced means an unpaid invoice exists. Partially paid means paid history exists and cost remains. Paid means the recorded purchase is settled, but evidence/refunds may still need follow-up. Closed means closure checks passed. Stages are calculated, not manually picked. Only the currency sign beside Total changes: yellow for an invoiced line with outstanding cost, green for Paid/Closed. A parent sign aggregates children. Green does not mean every receipt or refund is complete.</p>"
@@ -189,5 +194,10 @@ window.NLBGuide = [
     "group": "FAQ & troubleshooting",
     "title": "What is not implemented, and what still needs real-device verification?",
     "body": "<p>No bank transfers/reconciliation, automatic document reading, payroll engine, live calendar sync, cloud collaboration or online document sharing. Mac updates are manual. Browser workflow and backup tests do not substitute for native Mac installation/printing or Apple/Google calendar-import checks. The app is a budgeting/payment-record tool, not a full general ledger or tax system.</p>"
+  },
+  {
+    "group": "FAQ & troubleshooting",
+    "title": "Can I buy the developers a coffee?",
+    "body": "<p>The support option is a placeholder: <b>Not active at the moment</b>. Buy us a coffee is disabled. It does not open a website, collect payment details, create a subscription or add a budget expense. The approved message includes: “Contribute once, regularly, or never—the app works exactly the same either way.”</p><p>Any future support will go to No Longer Network. Stripe and the NLN website are not connected to this placeholder; hosting is being changed. There is no annual-cost claim or required contribution.</p>"
   }
 ];

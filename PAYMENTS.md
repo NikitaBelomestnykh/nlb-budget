@@ -1,4 +1,4 @@
-# Payments, timeline and documents — v1.10.0
+# Payments, timeline and documents — v1.11.0
 
 See [the current user guide](USER_GUIDE.md) for Quick start, task guides, FAQ, closeout, backup and troubleshooting instructions. This replaces the old release-by-release instruction appendices.
 
@@ -18,3 +18,8 @@ See [the current user guide](USER_GUIDE.md) for Quick start, task guides, FAQ, c
 
 ## Verification boundary
 Automated browser/financial/backup/layout checks are supplemented by published-package verification. Native Mac installation/printing and Apple/Google calendar imports need real-device verification. No bank integration, payroll engine, automatic document reading, external online sharing or live sync is implemented.
+
+## v1.11.0 interface refinements
+- Collapsed parent vendor/payroll defaults; clickable breadcrumbs and session-local Back/Forward preserve unposted drafts without posting financial changes. Saved/cancelled financial editors do not replay.
+- Dedicated payment-list PDF uses alternating backgrounds, separators and repeated page headings; budget PDF, binder and calendar exporters are unchanged.
+- Approved optional-support wording appears in Help and native About as inactive. No Stripe, Wix/site connection, external payment link, money collection, subscription or annual-cost line is implemented.

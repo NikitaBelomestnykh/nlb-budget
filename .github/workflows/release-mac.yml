@@ -22,6 +22,7 @@ jobs:
           node tests/payments-core.test.cjs
           node tests/lifecycle-core.test.cjs
           node tests/guide.test.cjs
+          node tests/navigation.test.cjs
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Build and publish Apple Silicon Mac release

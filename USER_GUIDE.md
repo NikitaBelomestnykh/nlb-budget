@@ -1,4 +1,4 @@
-# NO LONGER BUDGET — User guide (v1.10.0)
+# NO LONGER BUDGET — User guide (v1.11.0)
 
 Current workflow; release history lives in GitHub and the Build Log.
 
@@ -188,6 +188,14 @@ View version in **NO LONGER BUDGET → About**. Check for Updates… / How to Up
 
 Replacing the application is intended to preserve local data. Do not clear app storage, use an uninstaller or disable macOS security. If blocked, use System Settings → Privacy & Security → Open Anyway if offered. Native Mac installation still requires a real-device check.
 
+### Breadcrumbs, Back / Forward and vendor defaults
+
+The Payments & Timeline workspace shows your budget, section and deeper account/sub-account/line or editor in clickable breadcrumbs. Click an ancestor to return up a level. Back / Forward arrows revisit spaces during this open workspace, including document previews and vendor/document editors. History resets when the workspace closes or the budget changes.
+
+Unposted editor drafts are kept in this temporary history; navigating does not save a cost or post money. A successfully saved/cancelled editor is not restored as a new financial posting. Document preview URLs are recreated on return. Uploaded originals remain in the library even if an invoice draft is not saved.
+
+Parent **Default vendor & payroll company** panels start collapsed; click their heading to review/edit defaults. Payment-list PDFs use alternating record backgrounds and separators; the budget PDF, binder and calendar layouts are unchanged.
+
 ## FAQ & troubleshooting
 
 ### What do the stages and yellow/green signs mean?
@@ -253,4 +261,10 @@ Data is local to this app/computer; Saved means local autosave, not cloud backup
 ### What is not implemented, and what still needs real-device verification?
 
 No bank transfers/reconciliation, automatic document reading, payroll engine, live calendar sync, cloud collaboration or online document sharing. Mac updates are manual. Browser workflow and backup tests do not substitute for native Mac installation/printing or Apple/Google calendar-import checks. The app is a budgeting/payment-record tool, not a full general ledger or tax system.
+
+### Can I buy the developers a coffee?
+
+The support option is a placeholder: **Not active at the moment**. Buy us a coffee is disabled. It does not open a website, collect payment details, create a subscription or add a budget expense. The approved message includes: “Contribute once, regularly, or never—the app works exactly the same either way.”
+
+Any future support will go to No Longer Network. Stripe and the NLN website are not connected to this placeholder; hosting is being changed. There is no annual-cost claim or required contribution.
 
