@@ -19,14 +19,10 @@ jobs:
         run: |
           git apply .github/budget-pdf-v112.patch
           echo "8fa7779aa5eb7680b4f799183dd0096180cc6c3d287f92b41cc55ee448af588c  index.html" | shasum -a 256 -c -
-          python3 - <<'PYFINAL'
-          import base64, pathlib
-          pathlib.Path('.github/workflows/release-mac.yml').write_bytes(base64.b64decode('bmFtZTogUHVibGlzaCBNYWMgUmVsZWFzZQpvbjoKICBwdXNoOgogICAgYnJhbmNoZXM6IFttYWluXQogICAgcGF0aHM6IFtwYWNrYWdlLmpzb25dCiAgd29ya2Zsb3dfZGlzcGF0Y2g6CnBlcm1pc3Npb25zOgogIGNvbnRlbnRzOiB3cml0ZQpjb25jdXJyZW5jeToKICBncm91cDogbWFjLXJlbGVhc2UKICBjYW5jZWwtaW4tcHJvZ3Jlc3M6IGZhbHNlCmpvYnM6CiAgcmVsZWFzZToKICAgIHJ1bnMtb246IG1hY29zLTE0CiAgICBzdGVwczoKICAgICAgLSB1c2VzOiBhY3Rpb25zL2NoZWNrb3V0QHY0CiAgICAgIC0gdXNlczogYWN0aW9ucy9zZXR1cC1ub2RlQHY0CiAgICAgICAgd2l0aDoKICAgICAgICAgIG5vZGUtdmVyc2lvbjogJzIwJwogICAgICAtIG5hbWU6IFZhbGlkYXRlIHBheW1lbnQgbGVkZ2VyIGNhbGN1bGF0aW9ucwogICAgICAgIHJ1bjogfAogICAgICAgICAgbm9kZSB0ZXN0cy9wYXltZW50cy1jb3JlLnRlc3QuY2pzCiAgICAgICAgICBub2RlIHRlc3RzL2xpZmVjeWNsZS1jb3JlLnRlc3QuY2pzCiAgICAgICAgICBub2RlIHRlc3RzL2d1aWRlLnRlc3QuY2pzCiAgICAgICAgICBub2RlIHRlc3RzL25hdmlnYXRpb24udGVzdC5janMKICAgICAgICAgIG5vZGUgdGVzdHMvYnVkZ2V0LXBkZi50ZXN0LmNqcwogICAgICAtIG5hbWU6IEluc3RhbGwgZGVwZW5kZW5jaWVzCiAgICAgICAgcnVuOiBucG0gaW5zdGFsbCAtLW5vLWF1ZGl0IC0tbm8tZnVuZAogICAgICAtIG5hbWU6IEJ1aWxkIGFuZCBwdWJsaXNoIEFwcGxlIFNpbGljb24gTWFjIHJlbGVhc2UKICAgICAgICBydW46IG5wbSBydW4gcmVsZWFzZTptYWMgLS0gLS1hcm02NAogICAgICAgIGVudjoKICAgICAgICAgIEdIX1RPS0VOOiAke3sgc2VjcmV0cy5HSVRIVUJfVE9LRU4gfX0KICAgICAgICAgIENTQ19JREVOVElUWV9BVVRPX0RJU0NPVkVSWTogJ2ZhbHNlJwo='))
-          PYFINAL
           git rm .github/budget-pdf-v112.patch
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html .github/workflows/release-mac.yml
+          git add index.html
           git commit -m "Finalize approved v1.12.0 budget PDF source"
           git push origin HEAD:main
       - uses: actions/setup-node@v4
