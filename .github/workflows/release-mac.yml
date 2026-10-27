@@ -14,17 +14,6 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
-      - name: Apply approved budget PDF source patch
-        shell: bash
-        run: |
-          git apply .github/budget-pdf-v112.patch
-          echo "8fa7779aa5eb7680b4f799183dd0096180cc6c3d287f92b41cc55ee448af588c  index.html" | shasum -a 256 -c -
-          git rm .github/budget-pdf-v112.patch
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git commit -m "Finalize approved v1.12.0 budget PDF source"
-          git push origin HEAD:main
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
