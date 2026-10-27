@@ -1,4 +1,4 @@
-# Payments, timeline and documents — v1.11.0
+# Payments, timeline and documents — v1.12.0
 
 See [the current user guide](USER_GUIDE.md) for Quick start, task guides, FAQ, closeout, backup and troubleshooting instructions. This replaces the old release-by-release instruction appendices.
 
@@ -21,5 +21,8 @@ Automated browser/financial/backup/layout checks are supplemented by published-p
 
 ## v1.11.0 interface refinements
 - Collapsed parent vendor/payroll defaults; clickable breadcrumbs and session-local Back/Forward preserve unposted drafts without posting financial changes. Saved/cancelled financial editors do not replay.
-- Dedicated payment-list PDF uses alternating backgrounds, separators and repeated page headings; budget PDF, binder and calendar exporters are unchanged.
+- Dedicated payment-list PDF uses alternating backgrounds, separators and repeated page headings; binder and calendar exporters are unchanged. The budget PDF is redesigned separately in v1.12.0.
 - Approved optional-support wording appears in Help and native About as inactive. No Stripe, Wix/site connection, external payment link, money collection, subscription or annual-cost line is implemented.
+
+## v1.12.0 budget PDF
+The main Export & Share budget PDF follows the approved grey-shaded Top Sheet/detail design. Project headings repeat on every generated budget page. Export-only producer/location/agreements metadata and a principal-start override are saved per budget; a blank override follows Timeline production start without shifting payments. Base totals, fringes, contingency and Grand Total retain their existing calculations. Payment-report PDFs, binder, calendars, CSV and Excel are not reformatted in this release.

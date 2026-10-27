@@ -1,4 +1,4 @@
-# NO LONGER BUDGET — User guide (v1.11.0)
+# NO LONGER BUDGET — User guide (v1.12.0)
 
 Current workflow; release history lives in GitHub and the Build Log.
 
@@ -8,27 +8,26 @@ Current workflow; release history lives in GitHub and the Build Log.
 
 NO LONGER BUDGET keeps your original estimate, current expected cost, paid history and supporting documents together. It records financial decisions; it does not send payments, reconcile your bank or calculate payroll.
 
-
-- **Build the estimate.** Click + New Budget. Add accounts, sub-accounts and detail lines; keep different vendors on separate detail lines. Base cost is QTY × X × RATE. Apply budgeted fringes where needed.
-- **Confirm the cost and vendor.** Open a detail line’s six-dot menu → Vendor & Payments, or click its currency sign beside Total. Choose Vendor / crew member and, if relevant, Paid through. Enter agreed base/fringe costs and click Confirm cost. Blank amounts continue to follow the budget; enter explicit amounts to hold an agreement separately.
-- **Enter the invoice.** Click Add invoice…; enter the reference, recipient, amounts and dates, then select or upload supporting files. Review allocations before saving. An invoice records an obligation—not money paid. If a plan already covers this invoice, link that plan instead of creating a second obligation.
-- **Plan timing when needed.** Add payment plan… supports fixed, percentage and remaining-balance installments. Use a fixed date or a production milestone with a day offset. A payment plan is optional; an invoice can carry its own due date.
-- **Record money actually paid.** Use Record paid for an invoice/plan, or Record payment without invoice… for a direct expense or reimbursement. Enter the real paid amount and date. Attach a receipt/payment confirmation, or explicitly choose Skip receipt for now. Add a note if useful.
-- **Finish the evidence and returns.** Attach missing receipts later. Track an expected refund separately; record it as received only when the money comes back. Actuals update from paid amounts minus received refunds and corrections.
-- **Close out and back up.** Review unpaid balances, receipts, expected refunds and unscheduled costs. Close completed lines, download the required reports/binder and keep an external full backup.
+1. **Build the estimate.** Click + New Budget. Add accounts, sub-accounts and detail lines; keep different vendors on separate detail lines. Base cost is QTY × X × RATE. Apply budgeted fringes where needed.
+2. **Confirm the cost and vendor.** Open a detail line’s six-dot menu → Vendor & Payments, or click its currency sign beside Total. Choose Vendor / crew member and, if relevant, Paid through. Enter agreed base/fringe costs and click Confirm cost. Blank amounts continue to follow the budget; enter explicit amounts to hold an agreement separately.
+3. **Enter the invoice.** Click Add invoice…; enter the reference, recipient, amounts and dates, then select or upload supporting files. Review allocations before saving. An invoice records an obligation—not money paid. If a plan already covers this invoice, link that plan instead of creating a second obligation.
+4. **Plan timing when needed.** Add payment plan… supports fixed, percentage and remaining-balance installments. Use a fixed date or a production milestone with a day offset. A payment plan is optional; an invoice can carry its own due date.
+5. **Record money actually paid.** Use Record paid for an invoice/plan, or Record payment without invoice… for a direct expense or reimbursement. Enter the real paid amount and date. Attach a receipt/payment confirmation, or explicitly choose Skip receipt for now. Add a note if useful.
+6. **Finish the evidence and returns.** Attach missing receipts later. Track an expected refund separately; record it as received only when the money comes back. Actuals update from paid amounts minus received refunds and corrections.
+7. **Close out and back up.** Review unpaid balances, receipts, expected refunds and unscheduled costs. Close completed lines, download the required reports/binder and keep an external full backup.
 
 Try **Load full example budget** above. Trial by Software is a fictional sandbox; loading it creates a separate budget without replacing your existing work.
 
 ### Production closeout checklist
 
-- **Costs:** compare Budgeted with Expected final. Review unconfirmed costs and any overpayments or overallocated plans. Do not treat a deposit as a saving.
-- **Payments:** verify Still owed and Not scheduled yet. Pay, cancel or revise genuine outstanding obligations; use Finalize cost only when no further cost is expected.
-- **Evidence:** attach missing receipts/payment confirmations and check invoice assignments. Review legacy opening Actuals if present.
-- **Returns:** record received refunds against the original payment, or cancel a refund expectation that is no longer valid. Do not record expected money as received.
-- **Cash:** verify opening cash/as-of date, actual funding and dates against your own bank records. The app does not reconcile them for you.
-- **Closure:** close eligible lines. Paid and Closed are different: receipts, refunds or legacy-value review can still block closure.
-- **Delivery:** download budget/payment reports and a PDF binder. Review sensitive and archived documents before sending files.
-- **Protection:** export a full .nlb budget backup—or a workspace backup for all budgets and contacts—and verify it imports on a separate test copy. A PDF or ZIP is not a restorable budget backup.
+* **Costs:** compare Budgeted with Expected final. Review unconfirmed costs and any overpayments or overallocated plans. Do not treat a deposit as a saving.
+* **Payments:** verify Still owed and Not scheduled yet. Pay, cancel or revise genuine outstanding obligations; use Finalize cost only when no further cost is expected.
+* **Evidence:** attach missing receipts/payment confirmations and check invoice assignments. Review legacy opening Actuals if present.
+* **Returns:** record received refunds against the original payment, or cancel a refund expectation that is no longer valid. Do not record expected money as received.
+* **Cash:** verify opening cash/as-of date, actual funding and dates against your own bank records. The app does not reconcile them for you.
+* **Closure:** close eligible lines. Paid and Closed are different: receipts, refunds or legacy-value review can still block closure.
+* **Delivery:** download budget/payment reports and a PDF binder. Review sensitive and archived documents before sending files.
+* **Protection:** export a full .nlb budget backup—or a workspace backup for all budgets and contacts—and verify it imports on a separate test copy. A PDF or ZIP is not a restorable budget backup.
 
 This is a review checklist, not an automatic audit or a promise that the records match your bank.
 
@@ -148,6 +147,10 @@ Downloads provides payment reports, calendars, original-document ZIP selection, 
 
 The binder includes the whole budget, payment summary, document index and visible supported originals; payment/date filters do not trim it. Sensitive documents are excluded unless explicitly included. Missing, encrypted or unsupported included files stop export with an explanation. ZIP has its own selection, independent of payment filters.
 
+**Budget PDF layout:** the project name repeats at the top of every page. The Top Sheet uses Account / Description / Total columns, alternating white/light-grey rows, darker totals and a distinct Grand Total. Details and setup lists use the same shading; table headings and account/sub-account continuation labels repeat after page breaks. Base totals and fringes are labeled separately; the financial calculations are unchanged.
+
+Under PDF layout enter Budget producer (Prepared by), Shoot location and Cast/Crew agreements. Principal start follows Production start in Timeline & Funding unless a PDF-only override is entered; it does not move payment dates. Unknown fields show a dash. Export settings are saved per budget and included in backups. The optional title page, orientation, text size and section choices remain available. Long text wraps; an oversized text row continues on the next page without repeating its amount.
+
 ### Calendar snapshots and date ranges
 
 In Downloads choose **One calendar month** or **From / To dates**. PDF and .ics use the same inclusive boundaries, payment scope and history setting. Include paid payments, refunds & received funding to include history. Undated entries cannot be plotted; expected refunds remain forecast incoming items.
@@ -180,11 +183,10 @@ Find searches the selected budget’s account/sub-account names and detail descr
 
 View version in **NO LONGER BUDGET → About**. Check for Updates… / How to Update… use guided manual installation, not automatic download/restart.
 
-
-- Create external full backups of important budgets—or all budgets and contacts.
-- Download the release’s **arm64.dmg** for Apple Silicon Mac.
-- Quit with Cmd+Q, open the DMG, drag the app to Applications and choose Replace.
-- Reopen from Applications; check About, budgets, payment history and document previews.
+1. Create external full backups of important budgets—or all budgets and contacts.
+2. Download the release’s **arm64.dmg** for Apple Silicon Mac.
+3. Quit with Cmd+Q, open the DMG, drag the app to Applications and choose Replace.
+4. Reopen from Applications; check About, budgets, payment history and document previews.
 
 Replacing the application is intended to preserve local data. Do not clear app storage, use an uninstaller or disable macOS security. If blocked, use System Settings → Privacy & Security → Open Anyway if offered. Native Mac installation still requires a real-device check.
 
@@ -267,4 +269,3 @@ No bank transfers/reconciliation, automatic document reading, payroll engine, li
 The support option is a placeholder: **Not active at the moment**. Buy us a coffee is disabled. It does not open a website, collect payment details, create a subscription or add a budget expense. The approved message includes: “Contribute once, regularly, or never—the app works exactly the same either way.”
 
 Any future support will go to No Longer Network. Stripe and the NLN website are not connected to this placeholder; hosting is being changed. There is no annual-cost claim or required contribution.
-
