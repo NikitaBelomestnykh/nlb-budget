@@ -24,8 +24,14 @@ jobs:
           node tests/guide.test.cjs
           node tests/navigation.test.cjs
           node tests/budget-pdf.test.cjs
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install dependencies and browser
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install chromium
+      - name: Validate contact, calendar and backup workflows
+        run: |
+          for f in tests/*.test.cjs; do node "$f"; done
       - name: Build and publish Apple Silicon Mac release
         run: npm run release:mac -- --arm64
         env:
