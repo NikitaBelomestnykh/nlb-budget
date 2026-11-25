@@ -1,0 +1,61 @@
+name: Stage and publish v1.16.0
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/stage-v116.yml]
+permissions:
+  contents: write
+concurrency:
+  group: mac-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply and verify tested source
+        run: |
+          test "$(git rev-parse HEAD^)" = 79ca87e7f51542a8a70e1afab19f2a23ea81dd51
+          test "$(git rev-parse HEAD~5)" = 75e921ebf640efb61f6fb558659198c9afbc0aac
+          cat release-patches/v116.part-* > /tmp/nlb-v116.patch
+          test "$(shasum -a 256 /tmp/nlb-v116.patch | cut -d' ' -f1)" = cb740c06cbce6dc4365e3102e83bb5136c139d3d77a6e65f234c6b01076f1925
+          git apply --check /tmp/nlb-v116.patch
+          git apply /tmp/nlb-v116.patch
+          rm release-patches/v116.part-*
+          shasum -a 256 -c <<'HASHES'
+          7717c11f7d33b9e0f7d1f0a610d0f21db52ea6ef42f98142e94a4b2211ed477d  index.html
+          a7f317760d088b31421a995b45372041febcefafe13e5ebc153cdd7ab19fdcce  assets/payments.css
+          495352ed99525527364416fc926280ad6a754e9f8e060c6a150d4b57882d2fa1  assets/guide.js
+          a22f6e5439ea148c1bbdfafda6c12b301598be263f3cec3d1995b0135e7a3f62  PAYMENTS.md
+          81f7a35865f6c274becfb696303e8a9c2d05920f7d328f5cdfa329f1cf0c45d3  USER_GUIDE.md
+          09b3c8b81e271816ff8ac08fa202b633765db96b7a7a116781d9c87984df9bea  package.json
+          470666b78da52db420e6c5445b1933d85fc8802a9ea8c75f632d4062e637c624  tests/calendar-v115.test.cjs
+          d01d69e1916c69f08d7d7d27a7eb4ca9f5a0e831fc84347eb02f8ca5a6cdf831  tests/design-v116.test.cjs
+          0fd203f583a4cdf305d94c32c74c7fc2ff827dc88accc5f89f30da3f7ca1c77b  tests/timeline-calendar.test.cjs
+          HASHES
+      - name: Install dependencies and browser
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install chromium
+      - name: Test financial, contact and calendar workflows
+        run: |
+          for f in tests/*.test.cjs; do node "$f"; done
+      - name: Commit verified source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          git add tests/design-v116.test.cjs
+          git commit -m 'Release v1.16.0 timeline, calendar and contact redesign'
+          git push origin HEAD:main
+      - name: Build and publish Apple Silicon Mac release
+        run: npm run release:mac -- --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
