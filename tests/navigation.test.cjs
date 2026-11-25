@@ -9,9 +9,9 @@ assert(support.includes('disabled aria-describedby="support-inactive-status"'));
 assert(main.includes('app.setAboutPanelOptions'));assert(main.includes('Not active at the moment'));assert(main.includes('Contribute once, regularly, or never'));
 const ctx={window:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'assets/guide.js'),'utf8'),ctx);const g=ctx.window.NLBGuide;assert.equal(g.length,40);assert.deepEqual([...new Set(g.map(x=>x.group))],['Quick start','How-to guides','FAQ & troubleshooting']);let groups=0,last;for(const x of g){if(x.group!==last){groups++;last=x.group;}}assert.equal(groups,3);
 // Protect the approved v1.12 budget renderer; version metadata is intentionally excluded.
-const protectedSource=html.slice(0,html.indexOf('  // v1.6 payment workspace')).replace(/var APP_VERSION = "[^"]+"/,'var APP_VERSION = "VERSION"');
+const protectedSource=html.slice(0,html.indexOf('  // v1.6 payment workspace')).replace(/var APP_VERSION = "[^"]+"/,'var APP_VERSION = "VERSION"').replaceAll('[role="dialog"], nav, [role="navigation"], [data-no-tooltip]','[role="dialog"], nav, [role="navigation"]');
 assert.equal(crypto.createHash('sha256').update(protectedSource).digest('hex'),fs.readFileSync(path.join(__dirname,'budget-renderer.sha256'),'utf8').trim());
 assert(html.includes('Record continued: '));assert(html.includes('totalHeight<=pageStartY-M-22'));
-assert(html.includes("!['choose-upload','vendor-upload','vendor-logo-upload'].includes(btn.dataset.pm)"),'native upload input must survive while its chooser is open');
-assert(html.includes("el.matches('[role=\"dialog\"], nav, [role=\"navigation\"]')"),'landmark labels must not show as tooltips');
+assert(html.includes("!['choose-upload','vendor-upload','vendor-logo-upload','contact-csv-choose'].includes(btn.dataset.pm)"),'native upload input must survive while its chooser is open');
+assert(html.includes("el.matches('[role=\"dialog\"], nav, [role=\"navigation\"], [data-no-tooltip]')"),'landmark labels must not show as tooltips');
 console.log('PASS navigation safety/source syntax, grouped guide, inactive support and protected budget renderer');

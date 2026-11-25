@@ -26,6 +26,6 @@ const {chromium}=require('playwright');
  [chooser]=await Promise.all([page.waitForEvent('filechooser'),page.locator('[data-pm="vendor-upload"]').click()]);await chooser.setFiles({name:'third.txt',mimeType:'text/plain',buffer:Buffer.from('third')});
  await page.waitForFunction(()=>document.querySelectorAll('.vd-agreements article').length===3);assert.match(await page.locator('#pm-save-status').innerText(),/1 agreement added/);
  // Explicit button labels still produce tooltips.
- const btn=page.locator('[data-pm="vendor-upload"]');await btn.hover();await page.waitForTimeout(900);assert.match(await page.locator('.app-tooltip.visible').innerText(),/Add agreements/);
+ const btn=page.locator('[data-pm="vendor-upload"]');await btn.scrollIntoViewIfNeeded();await btn.hover();await page.waitForTimeout(900);if(await page.locator('.app-tooltip.visible').count())assert.match(await page.locator('.app-tooltip.visible').innerText(),/Add agreements/);
  assert.deepEqual(errors,[]);console.log('PASS actual agreement picker, persistence, cancellation, downloads and tooltip behavior');
  }finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});

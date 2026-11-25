@@ -1,4 +1,4 @@
-# NO LONGER BUDGET — User guide (v1.14.0)
+# NO LONGER BUDGET — User guide (v1.15.0)
 
 Current workflow; release history lives in GitHub and the Build Log.
 
@@ -65,15 +65,11 @@ Click the **# heading → Renumber**. Accounts renumber by hundreds within the c
 
 ### Setup, globals and live expressions
 
-**Crew and Cast:** In Payments & Timeline, use the Crew and Cast tabs for individual contacts. Choose one or more categories when creating or editing a contact; existing contacts stay in Vendors until categorized. A contact shared across categories is one record, with one set of locally stored agreements. Add deal memos, W-9/W-2 files and other documents from the contact dashboard. The app does not process or file tax forms. Full backups include these sensitive files; protect backup copies.
+**Crew and Cast:** Use their tabs for individual contacts; choose one category when saving. Older multi-category contacts remain unchanged until edited. Use **Import CSV** to map columns and preview contacts before creating new records. Imports do not overwrite existing contacts; check for duplicates. Dietary preferences and allergies may be stored in the contact. Agreements and sensitive details remain local and are included in backups.
 
-**Timeline:** Production phases and custom milestones appear visually on a shared date axis. The Calendar tab scrolls through months; its month selector controls the downloaded month.
+**Vendor dashboard:** Add a vendor, open it, upload agreements and link unassigned budget lines. Schedule each line separately. Use **Edit contact** and the circular logo button to add, change or remove a logo; save the contact to keep the change. Agreements are reusable on this computer; budget lines and payments are budget-specific.
 
-**Vendor dashboard:** Choose Setup → Vendors, add a vendor, and open its dashboard. Add signed agreements (100 MB per file), link unassigned detail lines, then schedule payments on each line. The dashboard shows expected final, net paid, scheduled unpaid, unscheduled amounts and a monthly calendar with daily due totals for this budget. Vendor agreements are reusable on this computer; lines and payment records are budget-specific.
-
-**Setup** opens Globals, Units, Fringes, Groups, Currency, Vendors, Payments & Timeline, Timeline & Funding and Documents. Close a manager/workspace with its × control. Vendors are a shared contact book; budget setup and payment records belong to the selected budget.
-
-Setup → Globals stores named numbers, text or expressions referencing other globals, such as `Day Rate * 5`. Type a global name directly into Description, QTY, UNIT, X or RATE; autocomplete helps. There is no chain-link button. Leaving a field displays the resolved value; selecting it restores the expression. Updates propagate to references. Uses counts name occurrences in detail fields and other globals—not just distinct rows.
+Setup opens Globals, Units, Fringes, Groups, Currency, Vendors, Payments & Timeline, Timeline & Funding and Documents. Globals hold reusable numbers, text or expressions such as `Day Rate * 5`. Type a global name into Description, QTY, UNIT, X or RATE; click the computed value to edit its expression.
 
 ### Fringes and groups without double-counting
 
@@ -133,11 +129,9 @@ Use **Correct / reverse** for an erroneous posting, not a genuine refund. Origin
 
 ### Production dates, funding and cash flow
 
-Setup → Timeline & Funding sets optional pre-production/production/post-production dates, custom milestones, opening cash and its as-of date. Save timeline switches to a read-only summary; Edit timeline restores editing. Expected and received funding have separate amounts/dates.
+Use **Edit timeline** on the production timeline to enter phase dates and opening cash. Select Custom milestone or Incoming funding beside **Add milestone**. The chart shows phase spans, custom milestones and dated funding with day/week divisions. Funding expected and received amounts/dates are distinct; an expectation does not record receipt.
 
-Unpaid milestone-relative dates move when their milestone moves. Fixed dates and historical paid dates stay unchanged. Positive offsets mean days after; negative offsets mean days before. Cash Flow is budget-wide: it includes movements on/after the opening date, while earlier movements are already represented by opening cash. Expected funding is not money already in the bank.
-
-Unallocated costs and undated installments remain **Not scheduled yet**. Contingency is a reserve, not invented dated spending. A reserve-funded allocation reduces remaining reserve without adding a second payment. Check missing dates and incoming funding before relying on a forecast.
+Unpaid milestone-relative dates move with their milestone. Fixed dates and historical paid dates stay unchanged. Cash Flow is budget-wide and includes movements on or after the opening date; earlier movements are already reflected in opening cash. Unallocated and undated costs remain Not scheduled yet. Contingency is a reserve, not invented dated spending.
 
 ### Documents, privacy, archives and ZIP selection
 
@@ -161,13 +155,11 @@ Under PDF layout enter Budget producer (Prepared by), Shoot location and Cast/Cr
 
 ### Calendar snapshots and date ranges
 
-The vendor dashboard calendar shows that vendor’s unpaid linked-line allocations summed by due date; choose an item to manage it. The separate Calendar tab shows budget-wide daily planned totals and can include paid history or incoming funding. Undated payments do not appear on either calendar.
+The Calendar tab displays scoped daily due totals. Choose **Week, Month, Year, Max**, or inclusive **From / To** dates. The same range, filters and history setting govern the display and its PDF, CSV and .ics downloads. Week, Month and Year use the current calendar period; Max spans the earliest through latest dated transaction, or the current month if none. Today returns to the current month. The outlined day is today. Scroll within the selected range. Select **View details** or **+ more** for all items on a crowded day. Arrows distinguish money in and out; green denotes paid/received, yellow denotes past-due unpaid. Undated items cannot appear.
 
-In Downloads choose **One calendar month** or **From / To dates**. PDF and .ics use the same inclusive boundaries, payment scope and history setting. Include paid payments, refunds & received funding to include history. Undated entries cannot be plotted; expected refunds remain forecast incoming items.
+The contact dashboard has a separate scrollable calendar and Today button. Shared payments show only that contact’s linked-line allocations. Downloads has its own calendar controls. PDF ranges are limited to ten years; CSV and .ics can cover longer ranges.
 
-PDF creates a page for each touched month with additional detail pages for crowded dates. A PDF range is limited to 10 years; .ics can cover longer ranges. Empty ranges produce no invented events. Calendar-view buttons use its displayed month; Custom date range… opens Downloads.
-
-Import .ics into a new dedicated Apple/Google calendar. For an updated snapshot, delete only that old dedicated calendar and import into a new one. There is no live sync; the app does not create/delete external calendars. Live import on your calendar service still needs verification.
+.ics is an import-once snapshot, not live synchronization. First create a dedicated calendar in Apple Calendar (File → New Calendar) or Google Calendar (Settings → Add calendar → Create new calendar), then import the file into it. For a replacement snapshot, remove only the old dedicated calendar and import into another new one. The app does not create or delete calendars; real-device imports need verification.
 
 ### Saving, full backups and safe restoration
 

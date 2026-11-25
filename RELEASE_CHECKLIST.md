@@ -1,4 +1,4 @@
-# v1.13.0 release-readiness checklist
+# v1.15.0 release-readiness checklist
 
 ## Verified locally
 - [x] Financial core, cache and lifecycle/refund invariants.
@@ -12,7 +12,7 @@
 
 ## Real-device checks — still pending
 Use fictional test data and external backups. Do not delete production app data or replace your personal calendar.
-- [ ] On an Apple Silicon Mac, back up important budgets/workspace, replace the app from the new DMG and confirm About shows v1.13.0.
+- [ ] On an Apple Silicon Mac, back up important budgets/workspace, replace the app from the new DMG and confirm About shows v1.15.0.
 - [ ] Reopen existing budgets; compare totals, Actuals, invoices and payment history; preview original documents.
 - [ ] Test a payment with receipt and explicit receipt skip; add evidence later; check a partial payment and refund.
 - [ ] Import a full workspace into a separate safe test installation/profile. Confirm contacts, folders, payment records and original document bytes.
@@ -40,3 +40,10 @@ Automatic document reading, bank transfers/reconciliation, payroll calculations,
 - [x] Multiple vendor agreement originals and single-budget/workspace restore; malformed agreement data rejects without state changes.
 - [ ] On a Mac, add signed test agreements, link two lines, create and record payments, then verify calendar totals and preview/download files.
 - [ ] Restore budget and whole-workspace backups into a separate safe profile and check original agreement bytes and vendor links.
+
+## Contacts and calendars — v1.15.0
+- [x] Local Chromium tests: CSV mapping and quoted data, single-category selection, legacy multi-category preservation, dietary fields, staged logos, preview breadcrumb and backup of agreements.
+- [x] Local Chromium tests: daily totals and overflow, Today, scrolling and equal week heights; selected calendar range matches PDF/CSV/ICS; $4,500 location and partial payment.
+- [ ] On a real Mac, test CSV mapping, agreement preview breadcrumb, logo upload/cancel and full backup/restore using fictional sensitive data.
+- [ ] Confirm the mounted installer volume has its distinctive eject icon. The downloaded DMG file icon is controlled by Finder and remains unverified; the installed app retains its app icon.
+- [ ] Create new dedicated Apple and Google test calendars manually and import an .ics range; confirm event dates, amounts and filtering. The app does not create external calendars or sync them.
