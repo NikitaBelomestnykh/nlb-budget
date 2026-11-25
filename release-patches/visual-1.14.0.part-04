@@ -1,0 +1,110 @@
+utton" data-pm="space-forward" aria-label="Forward to next space"${spaceNav.pos>=spaceNav.entries.length-1?' disabled aria-description="No next space in this open workspace."':''}>→</button></div><ol class="space-crumbs">${pieces.map(p=>'<li>'+p+'</li>').join('')}</ol>`;}
++  function spaceBar(){const layer=document.getElementById('pm-layer');if(!layer||layer.hidden)return;let bar=layer.querySelector('.space-nav');if(!bar){bar=document.createElement('nav');bar.className='space-nav';bar.setAttribute('aria-label','Workspace navigation');layer.querySelector('.pm-tabs').after(bar);}const pieces=[spaceCrumb(active().title,'space-budget'),spaceCrumb('Payments & Timeline','space-root')],target=lcTarget();pieces.push(spaceCrumb(spaceTabs[pm.tab]||pm.tab,'space-section',pm.tab,!target&&!pm.form&&!(['vendors','crew','cast'].includes(pm.tab)&&pm.vendorPage)));if(pm.tab==='payments'&&target){const r=target.kind==='line'?pmRow(target.id):target.kind==='sub'?LC.rows(active(),target)[0]:null;const account=r?.account||(target.kind==='account'?LC.entity(active(),target):null),sub=r?.sub||(target.kind==='sub'?LC.entity(active(),target):null);if(account)pieces.push(spaceCrumb(account.num+' '+account.name,'space-target','account:'+account.id,target.kind==='account'&&!pm.form));if(sub)pieces.push(spaceCrumb(sub.num+' '+sub.name,'space-target','sub:'+sub.id,target.kind==='sub'&&!pm.form));if(target.kind==='line')pieces.push(spaceCrumb(r?.line.description||'Untitled line','space-target','line:'+target.id,!pm.form));}
++ if(['vendors','crew','cast'].includes(pm.tab)&&pm.vendorPage&&pmVendor(pm.vendorPage))pieces.push(spaceCrumb(pmVendorLabel(pm.vendorPage),'vendor-dashboard',pm.vendorPage,!pm.form));if(pm.form){const f=pm.form,name=f.value?.internalName||f.value?.originalName||f.kind==='vendor'&&f.value?.name;if(name&&!f.agreementVendorId)pieces.push(spaceCrumb(name,f.kind==='vendor'?'space-vendor':'space-document',f.value.id));pieces.push(spaceCrumb(f.agreementVendorId?'Preview: '+name:spaceFormNames[f.kind]||'Edit','',null,true));}bar.innerHTML=`<div class="space-arrows"><button type="button" data-pm="space-back" aria-label="Back to previous space"${spaceNav.pos<=0?' disabled aria-description="No previous space in this open workspace."':''}>←</button><button type="button" data-pm="space-forward" aria-label="Forward to next space"${spaceNav.pos>=spaceNav.entries.length-1?' disabled aria-description="No next space in this open workspace."':''}>→</button></div><ol class="space-crumbs">${pieces.map(p=>'<li>'+p+'</li>').join('')}</ol>`;}
+   function spaceSanitize(x){const cf=LC.ensure(active());if(x.line&&!pmRow(x.line)){x.line='';x.parent=null;x.form=null;}if(x.parent&&!LC.entity(active(),x.parent)){x.parent=null;x.form=null;}if(x.account&&!active().accounts.some(a=>a.id===x.account))x.account='';if(x.sub&&!active().accounts.some(a=>a.subAccounts.some(s=>s.id===x.sub)))x.sub='';if(x.vendorPage&&!pmVendor(x.vendorPage))x.vendorPage='';const f=x.form;if(f?.postId&&cf.ledger.some(e=>e.id===f.postId))x.form=null;if(f&&['doc','preview'].includes(f.kind)&&!(f.agreementVendorId?vdAgreementList(pmVendor(f.agreementVendorId)||{}).some(d=>d.id===f.value?.id):cf.documents.some(d=>d.id===f.value?.id)))x.form=null;if(f?.kind==='vendor'&&f.value?.id&&!pmVendor(f.value.id))x.form=null;return x;}
+   async function spaceMove(delta){if(spaceNav.restoring||spaceNav.hold||pm.busy)return;const pos=spaceNav.pos+delta;if(pos<0||pos>=spaceNav.entries.length)return;spaceSave();spaceNav.restoring=true;try{const x=spaceSanitize(spaceClone(spaceNav.entries[pos]));if(pm.preview)URL.revokeObjectURL(pm.preview);pm.preview=null;for(const k of spaceFields)pm[k]=x[k];pm.form=x.form;pm.downloadError='';pm.notice='';if(pm.form?.kind==='preview'){const d=pm.form.agreementVendorId?vdAgreementList(pmVendor(pm.form.agreementVendorId)||{}).find(d=>d.id===pm.form.value.id):pmCF().documents.find(d=>d.id===pm.form.value.id);if(d)pm.preview=URL.createObjectURL(await pmBlob(d));else pm.form=null;}spaceNav.pos=pos;pmRender();const body=document.querySelector('#pm-layer .pm-body');if(body)body.scrollTop=x.scroll||0;}finally{spaceNav.restoring=false;spaceBar();}}
+   const spaceOldRender=pmRenderBody;pmRenderBody=function(){if(!spaceNav.restoring)spaceSave();spaceOldRender();spaceTrack();spaceBar();};
+diff --git a/package.json b/package.json
+index 6392994..0f77370 100644
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "no-longer-budget",
+   "productName": "NO LONGER BUDGET",
+-  "version": "1.13.0",
++  "version": "1.14.0",
+   "description": "NO LONGER BUDGET desktop app",
+   "main": "main.js",
+   "author": "No Longer Network",
+diff --git a/tests/budget-renderer.sha256 b/tests/budget-renderer.sha256
+index 4672265..5fd42d8 100644
+--- a/tests/budget-renderer.sha256
++++ b/tests/budget-renderer.sha256
+@@ -1 +1 @@
+-a9a5d84eb2a8883f5629bda981fbeaa8276dd8c093ea670351a6fb8b470ca3f5
++96d8a1b3b31932a599db061b6269205c65c029beb9f826976d5e23954ca5947e
+diff --git a/tests/crew-cast.test.cjs b/tests/crew-cast.test.cjs
+new file mode 100644
+index 0000000..20f738a
+--- /dev/null
++++ b/tests/crew-cast.test.cjs
+@@ -0,0 +1,3 @@
++const assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs'),os=require('node:os');const {chromium}=require('playwright');
++(async()=>{const browser=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{}),headless:true,args:['--no-sandbox','--allow-file-access-from-files']});const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'nlb-contact-'));try{const p=await browser.newPage({acceptDownloads:true}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto('file://'+path.resolve(__dirname,'../index.html'));await p.locator('[data-action="pm-open"]').click();await p.locator('[data-pm="tab"][data-id="crew"]').click();assert.match(await p.locator('.vd-vendors-intro h3').innerText(),/Crew/);await p.locator('[data-pm="new-vendor"]').click();await p.locator('input[name="name"]').last().fill('Jordan Individual');assert(await p.locator('[name="contactRole"][value="crew"]').isChecked());await p.locator('[name="contactRole"][value="cast"]').check();await p.locator('form[data-pm-form="editor"] button[type="submit"]').click();assert.match(await p.locator('.vendor-dashboard h3').first().innerText(),/Jordan/);
++const [chooser]=await Promise.all([p.waitForEvent('filechooser'),p.locator('[data-pm="vendor-upload"]').click()]);await chooser.setFiles([{name:'deal-memo.txt',mimeType:'text/plain',buffer:Buffer.from('signed deal memo')},{name:'w9.txt',mimeType:'text/plain',buffer:Buffer.from('private form')}]);await p.waitForFunction(()=>document.querySelectorAll('.vd-agreements article').length===2);let state=await p.evaluate(()=>JSON.parse(localStorage.getItem('no-longer-budget-v9'))),v=state.vendors.find(x=>x.name==='Jordan Individual');assert.deepEqual(v.roles,['crew','cast']);assert.equal(v.agreements.length,2);const id=v.id;await p.locator('[data-pm="tab"][data-id="cast"]').click();assert.equal(await p.locator('.vd-vendor-card').filter({hasText:'Jordan Individual'}).count(),1);await p.locator('.vd-vendor-card').filter({hasText:'Jordan Individual'}).locator('[data-pm="vendor-dashboard"]').click();assert.equal(await p.locator('.vd-agreements article').count(),2);await p.locator('[data-pm="tab"][data-id="vendors"]').click();assert.equal(await p.locator('.vd-vendor-card').filter({hasText:'Jordan Individual'}).count(),0);await p.locator('[data-pm="tab"][data-id="downloads"]').click();const [dl]=await Promise.all([p.waitForEvent('download'),p.locator('[data-pm="clarity-workspace-backup"]').click()]);const fn=path.join(tmp,'workspace.json');await dl.saveAs(fn);const backup=JSON.parse(fs.readFileSync(fn));assert.deepEqual(backup.vendors.find(x=>x.id===id).roles,['crew','cast']);assert.equal(backup.vendorAgreementData.filter(a=>a.vendorId===id).length,2);await p.reload();await p.locator('[data-action="pm-open"]').click();await p.locator('[data-pm="tab"][data-id="cast"]').click();assert.equal(await p.locator('.vd-vendor-card').filter({hasText:'Jordan Individual'}).count(),1);assert.deepEqual(errors,[]);console.log('PASS crew/cast categories, shared contact, attachments and workspace backup');}finally{await browser.close();fs.rmSync(tmp,{recursive:true,force:true});}})().catch(e=>{console.error(e);process.exitCode=1});
+diff --git a/tests/navigation.test.cjs b/tests/navigation.test.cjs
+index 42fbb70..78ce609 100644
+--- a/tests/navigation.test.cjs
++++ b/tests/navigation.test.cjs
+@@ -12,4 +12,6 @@ const ctx={window:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'assets/
+ const protectedSource=html.slice(0,html.indexOf('  // v1.6 payment workspace')).replace(/var APP_VERSION = "[^"]+"/,'var APP_VERSION = "VERSION"');
+ assert.equal(crypto.createHash('sha256').update(protectedSource).digest('hex'),fs.readFileSync(path.join(__dirname,'budget-renderer.sha256'),'utf8').trim());
+ assert(html.includes('Record continued: '));assert(html.includes('totalHeight<=pageStartY-M-22'));
++assert(html.includes("!['choose-upload','vendor-upload','vendor-logo-upload'].includes(btn.dataset.pm)"),'native upload input must survive while its chooser is open');
++assert(html.includes("el.matches('[role=\"dialog\"], nav, [role=\"navigation\"]')"),'landmark labels must not show as tooltips');
+ console.log('PASS navigation safety/source syntax, grouped guide, inactive support and protected budget renderer');
+diff --git a/tests/timeline-calendar.test.cjs b/tests/timeline-calendar.test.cjs
+new file mode 100644
+index 0000000..785891e
+--- /dev/null
++++ b/tests/timeline-calendar.test.cjs
+@@ -0,0 +1,5 @@
++const assert=require('node:assert/strict'),path=require('node:path'),{chromium}=require('playwright');
++(async()=>{const browser=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{}),headless:true,args:['--no-sandbox','--allow-file-access-from-files']});try{const p=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto('file://'+path.resolve(__dirname,'../index.html'));await p.locator('[data-action="pm-open"]').click();await p.locator('[data-pm="tab"][data-id="timeline"]').click();assert(await p.locator('.pt-row').count()>=3);assert(await p.locator('.pt-bar').count()>=1);const heading=p.locator('.pm-heading-toolbar').first();const boxes=await heading.evaluate(el=>{const a=el.querySelector('h3').getBoundingClientRect(),b=el.querySelector('button').getBoundingClientRect();return [a.top+a.height/2,b.top+b.height/2]});assert(Math.abs(boxes[0]-boxes[1])<1,'heading and button centers align');
++await p.locator('[data-pm="tab"][data-id="calendar"]').click();await p.locator('[name="calendarMonth"]').fill('2026-11');const stream=p.locator('.pm-calendar-stream');assert.equal(await p.locator('.pm-month-panel').count(),3);const start=await p.locator('[name="calendarMonth"]').inputValue();assert.equal(start,'2026-11');
++for(let i=0;i<25;i++){await stream.evaluate(e=>e.scrollTop=e.scrollHeight);await p.waitForTimeout(25)}let months=await p.locator('.pm-month-panel').evaluateAll(es=>es.map(e=>e.dataset.month));assert(months.at(-1)>'2027-11','continuous forward months');assert(months.length<=18,'rendered months remain bounded');
++for(let i=0;i<32;i++){await stream.evaluate(e=>e.scrollTop=0);await p.waitForTimeout(25)}months=await p.locator('.pm-month-panel').evaluateAll(es=>es.map(e=>e.dataset.month));assert(months[0]<'2026-11','continuous backward months');assert(months.length<=18);const current=await p.locator('[name="calendarMonth"]').inputValue();await p.locator('[data-pm="calendar-next"]').click();const after=await p.locator('[name="calendarMonth"]').inputValue();assert.notEqual(after,current,'next month changes selected export month');assert.equal(await p.locator('.pm-month-panel').count(),3);await p.locator('[data-pm="calendar-prev"]').click();assert.equal(await p.locator('[name="calendarMonth"]').inputValue(),current);assert.equal(await p.locator('.pm-tabs svg').count(),9);assert.deepEqual(errors,[]);console.log('PASS visual timeline, aligned headings, scrolling calendar and month controls');}finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});
+diff --git a/tests/vendor-upload-button.test.cjs b/tests/vendor-upload-button.test.cjs
+new file mode 100644
+index 0000000..c6f1b3b
+--- /dev/null
++++ b/tests/vendor-upload-button.test.cjs
+@@ -0,0 +1,31 @@
++const assert=require('node:assert/strict'),path=require('node:path');
++const {chromium}=require('playwright');
++(async()=>{const browser=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{}),headless:true,args:['--no-sandbox','--allow-file-access-from-files']});try{
++ const page=await browser.newPage({viewport:{width:1440,height:900},acceptDownloads:true}),errors=[];
++ page.on('pageerror',e=>errors.push(e.message));
++ await page.goto('file://'+path.resolve(__dirname,'../index.html'));
++ await page.locator('[data-action="pm-open"]').click();
++ await page.locator('[data-pm="tab"][data-id="vendors"]').click();
++ await page.locator('[data-pm="new-vendor"]').click();
++ await page.locator('input[name="name"]').last().fill('Upload Button Test');
++ await page.locator('form[data-pm-form="editor"] button[type="submit"]').click();
++ await page.locator('.vendor-dash-heading').getByText('Upload Button Test').waitFor();
++ // The entire payment dialog must not inherit a tooltip from its accessibility label.
++ await page.locator('.vendor-dash-heading h3').hover(); await page.waitForTimeout(900);
++ assert.notEqual(await page.locator('.app-tooltip.visible').count(),1,'workspace label appeared as tooltip');
++ let [chooser]=await Promise.all([page.waitForEvent('filechooser'),page.locator('[data-pm="vendor-upload"]').click()]);
++ assert(await chooser.element().evaluate(el=>el.isConnected),'native picker input was destroyed before selection');
++ await chooser.setFiles([{name:'signed-a.pdf',mimeType:'application/pdf',buffer:Buffer.from('first signed original')},{name:'signed-b.pdf',mimeType:'application/pdf',buffer:Buffer.from('second signed original')}]);
++ await page.waitForFunction(()=>document.querySelectorAll('.vd-agreements article').length===2);
++ assert.match(await page.locator('#pm-save-status').innerText(),/2 agreements added/);
++ await page.reload();await page.locator('[data-action="pm-open"]').click();await page.locator('[data-pm="tab"][data-id="vendors"]').click();await page.locator('.vd-vendor-card').filter({hasText:'Upload Button Test'}).locator('[data-pm="vendor-dashboard"]').click();
++ assert.equal(await page.locator('.vd-agreements article').count(),2,'agreements survive restart');
++ const [download]=await Promise.all([page.waitForEvent('download'),page.locator('.vd-agreements article').first().getByRole('button',{name:'Download'}).click()]);
++ const stream=await download.createReadStream();let chunks=[];for await(const c of stream)chunks.push(c);assert.equal(Buffer.concat(chunks).toString(),'first signed original');
++ [chooser]=await Promise.all([page.waitForEvent('filechooser'),page.locator('[data-pm="vendor-upload"]').click()]);await chooser.setFiles([]);
++ [chooser]=await Promise.all([page.waitForEvent('filechooser'),page.locator('[data-pm="vendor-upload"]').click()]);await chooser.setFiles({name:'third.txt',mimeType:'text/plain',buffer:Buffer.from('third')});
++ await page.waitForFunction(()=>document.querySelectorAll('.vd-agreements article').length===3);assert.match(await page.locator('#pm-save-status').innerText(),/1 agreement added/);
++ // Explicit button labels still produce tooltips.
++ const btn=page.locator('[data-pm="vendor-upload"]');await btn.hover();await page.waitForTimeout(900);assert.match(await page.locator('.app-tooltip.visible').innerText(),/Add agreements/);
++ assert.deepEqual(errors,[]);console.log('PASS actual agreement picker, persistence, cancellation, downloads and tooltip behavior');
++ }finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});
+diff --git a/tests/vendor-visual.test.cjs b/tests/vendor-visual.test.cjs
+new file mode 100644
+index 0000000..f82d0db
+--- /dev/null
++++ b/tests/vendor-visual.test.cjs
+@@ -0,0 +1,10 @@
++const assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs'),os=require('node:os');const {chromium}=require('playwright');
++const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'nlb-visual-'));const sample=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/a1sAAAAASUVORK5CYII=','base64');
++(async()=>{const browser=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{}),headless:true,args:['--no-sandbox','--allow-file-access-from-files']});try{const p=await browser.newPage({viewport:{width:1440,height:900},acceptDownloads:true}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto('file://'+path.resolve(__dirname,'../index.html'));await p.locator('[data-action="pm-open"]').click();await p.locator('[data-pm="tab"][data-id="vendors"]').click();
++let cards=p.locator('.vd-vendor-card'),camera=cards.filter({hasText:'Example Camera Rentals'});assert.equal(await cards.filter({hasText:'Example Retired Supplier'}).count(),0,'archived example hidden');await camera.locator('[data-pm="vendor-dashboard"]').click();let [chooser]=await Promise.all([p.waitForEvent('filechooser'),p.locator('[data-pm="vendor-logo-upload"]').click()]);assert(await chooser.element().evaluate(e=>e.isConnected));await chooser.setFiles({name:'company.png',mimeType:'image/png',buffer:sample});await p.waitForFunction(()=>document.querySelector('.vd-dashboard-identity img'));assert.match(await p.locator('#pm-save-status').innerText(),/logo saved/i);
++let state=await p.evaluate(()=>JSON.parse(localStorage.getItem('no-longer-budget-v9'))),logo=state.vendors.find(v=>v.name==='Example Camera Rentals').logoDataUrl;assert(logo.startsWith('data:image/png;base64,'));await p.reload();await p.locator('[data-action="pm-open"]').click();await p.locator('[data-pm="tab"][data-id="vendors"]').click();camera=cards.filter({hasText:'Example Camera Rentals'});assert.equal(await camera.locator('img.vd-logo').count(),1);const pos=await cards.evaluateAll(xs=>xs.filter(x=>getComputedStyle(x).display!=='none').slice(0,4).map(x=>({bottom:x.getBoundingClientRect().bottom,actions:x.querySelector('.vd-card-actions').getBoundingClientRect().bottom})));for(const x of pos)assert(Math.abs((x.bottom-x.actions)-17)<2,'card buttons need equal bottom margin');
++// Sample archive disappears, while ordinary vendor archive remains available.
++await camera.locator('[data-pm="archive-vendor"]').click();assert.equal(await cards.filter({hasText:'Example Camera Rentals'}).count(),0);await p.locator('[data-pm="new-vendor"]').click();await p.locator('input[name="name"]').last().fill('Real Vendor');await p.locator('form[data-pm-form="editor"] button[type="submit"]').click();await p.locator('[data-pm="vendors-overview"]').click();await cards.filter({hasText:'Real Vendor'}).locator('[data-pm="archive-vendor"]').click();assert.equal(await cards.filter({hasText:'Real Vendor'}).locator('[data-pm="archive-vendor"]').innerText(),'Unarchive');
++await p.locator('[data-pm="tab"][data-id="downloads"]').click();const [dl]=await Promise.all([p.waitForEvent('download'),p.locator('[data-pm="clarity-workspace-backup"]').click()]);const fn=path.join(tmp,'workspace.json');await dl.saveAs(fn);assert.equal(JSON.parse(fs.readFileSync(fn)).vendors.find(v=>v.name==='Example Camera Rentals').logoDataUrl,logo);
++const q=await browser.newPage();q.on('dialog',d=>d.accept());await q.goto('file://'+path.resolve(__dirname,'../index.html'));await q.locator('[data-action="open-import"]').click();await q.locator('#import-nlb-input').setInputFiles(fn);await q.locator('[data-action="import-nlb"]').click();await q.locator('[data-action="confirm-ok"]').click();await q.waitForFunction(()=>JSON.parse(localStorage.getItem('no-longer-budget-v9')).budgets.some(b=>b.title.endsWith('(Imported)')));const imported=await q.evaluate(()=>JSON.parse(localStorage.getItem('no-longer-budget-v9')));assert(imported.vendors.some(v=>v.name==='Example Camera Rentals'&&v.logoDataUrl===logo),'logo survives full workspace restore');await q.close();
++await p.locator('[data-pm="close"]').click();await p.locator('[data-action="open-help"]').click();await p.locator('[data-action="restore-sample-budget"]').click();await p.locator('[data-action="close-help"]').click();await p.locator('[data-action="pm-open"]').click();await p.locator('[data-pm="tab"][data-id="vendors"]').click();assert.equal(await cards.filter({hasText:'Example Camera Rentals'}).count(),1,'restore full example makes archived sample vendor visible');assert.equal(await cards.filter({hasText:'Example Camera Rentals'}).locator('img.vd-logo').count(),1,'restoration preserves logo');assert.deepEqual(errors,[]);console.log('PASS logos, workspace restore, card alignment and example-vendor archive');}finally{await browser.close();fs.rmSync(tmp,{recursive:true,force:true})}})().catch(e=>{console.error(e);process.exitCode=1});
