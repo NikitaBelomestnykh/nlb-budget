@@ -20,11 +20,11 @@ jobs:
           node-version: '20'
       - name: Apply and verify tested source
         run: |
-          test "$(git rev-parse HEAD~6)" = b07d56f7764c96c5586a0abc16b778c3494f05b4
+          test "$(git rev-parse HEAD~8)" = b07d56f7764c96c5586a0abc16b778c3494f05b4
           cat release-patches/vendor-1.13.0.part-* > /tmp/nlb-vendor-release.patch
           git apply --check /tmp/nlb-vendor-release.patch
           git apply /tmp/nlb-vendor-release.patch
-          rm release-patches/vendor-1.13.0.part-* .github/workflows/stage-vendor-release.yml
+          rm release-patches/vendor-1.13.0.part-*
           shasum -a 256 -c <<'HASHES'
           42f6c9b2e83e1a87c1b505bfa5c6ba13825007ae4e863fd2ba88598a15b9e61f  index.html
           f1720637f7dfd64664b5fbb249845143966277c322bd34c78d03d17baee81550  assets/payments.css
@@ -37,7 +37,6 @@ jobs:
           a9def8ffaf7500dc5474731e38ca287d4215ad70a687774687855b5f78446a6b  tests/vendor-workflow-local.test.cjs
           7721ae3e971182026e5edf4f580339d19af13a48d5d166e9167e1aa411ef2402  tests/calendar-daily-local.test.cjs
           HASHES
-          sed -i '' 's/runs-on: macos-14/runs-on: macos-15/' .github/workflows/release-mac.yml
       - name: Validate financial and application safeguards
         run: |
           node tests/payments-core.test.cjs
@@ -62,7 +61,7 @@ jobs:
           git add -u
           git add tests/vendor-example-local.test.cjs tests/vendor-workflow-local.test.cjs tests/calendar-daily-local.test.cjs
           git commit -m 'Release v1.13.0 vendor dashboard and agreements'
-          git push origin HEAD:main
+          if ! result=$(git push origin HEAD:main 2>&1); then echo "::error::Git push failed: $result"; exit 1; fi
       - name: Build and publish Apple Silicon Mac release
         run: npm run release:mac -- --arm64
         env:
