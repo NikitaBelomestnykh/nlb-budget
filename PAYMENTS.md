@@ -1,4 +1,4 @@
-# Payments, timeline and documents — v1.15.0
+# Payments, timeline and documents — v1.16.0
 
 See [the current user guide](USER_GUIDE.md) for Quick start, task guides, FAQ, closeout, backup and troubleshooting instructions. This replaces the old release-by-release instruction appendices.
 
@@ -34,3 +34,7 @@ The main Export & Share budget PDF follows the approved grey-shaded Top Sheet/de
 ## Crew, cast and visual timelines
 
 Crew and Cast are separate views of the shared local contact book. Choose one category when creating or editing a contact; existing multi-category records remain unchanged until explicitly edited. Crew and Cast CSV import maps columns, previews rows and creates additive contacts without overwriting existing records. Dietary preferences and allergies are stored locally. Deal memos, W-9/W-2 files and other agreements stay local, with full originals in workspace backups and referenced-contact originals in single-budget backups. These backups are sensitive. The app does not process or file tax forms. Vendor logos are edited via the circle in Edit contact and backed up with contact information. Production phases, custom milestones and funding appear on a shared date axis. Calendar ranges govern screen, PDF, CSV and .ics snapshots; neither calendar syncs or creates an external calendar.
+
+## v1.16.0 interface
+
+The Timeline & Calendar tab combines the production chart and payment calendar. The chart scrolls horizontally; the calendar defaults to Max and PDF exports include daily unpaid DUE totals and a date-grouped transaction list. Contact editing is grouped as a profile; budget-line linking has search and account/sub-account sections.

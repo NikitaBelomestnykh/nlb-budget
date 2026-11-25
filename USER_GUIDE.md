@@ -1,4 +1,4 @@
-# NO LONGER BUDGET — User guide (v1.15.0)
+# NO LONGER BUDGET — User guide (v1.16.0)
 
 Current workflow; release history lives in GitHub and the Build Log.
 
@@ -155,7 +155,7 @@ Under PDF layout enter Budget producer (Prepared by), Shoot location and Cast/Cr
 
 ### Calendar snapshots and date ranges
 
-The Calendar tab displays scoped daily due totals. Choose **Week, Month, Year, Max**, or inclusive **From / To** dates. The same range, filters and history setting govern the display and its PDF, CSV and .ics downloads. Week, Month and Year use the current calendar period; Max spans the earliest through latest dated transaction, or the current month if none. Today returns to the current month. The outlined day is today. Scroll within the selected range. Select **View details** or **+ more** for all items on a crowded day. Arrows distinguish money in and out; green denotes paid/received, yellow denotes past-due unpaid. Undated items cannot appear.
+The Timeline & Calendar tab shows the production timeline above the payment calendar, with scoped daily due totals. The timeline scrolls sideways. Choose **Week, Month, Year, Max**, or inclusive **From / To** dates; Max is the default. The same range, filters and history setting govern the display and its PDF, CSV and .ics downloads. Week, Month and Year use the current calendar period; Max spans the earliest through latest dated transaction, or the current month if none. Today returns to the current month. The outlined day is today. Scroll within the selected range. The PDF includes daily DUE totals and a transaction list grouped by date. Select **View details** or **+ more** for all items on a crowded day. Arrows distinguish money in and out; green denotes paid/received, yellow denotes past-due unpaid. Undated items cannot appear.
 
 The contact dashboard has a separate scrollable calendar and Today button. Shared payments show only that contact’s linked-line allocations. Downloads has its own calendar controls. PDF ranges are limited to ten years; CSV and .ics can cover longer ranges.
 
