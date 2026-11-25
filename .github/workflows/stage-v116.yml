@@ -20,8 +20,8 @@ jobs:
           node-version: '20'
       - name: Apply and verify tested source
         run: |
-          test "$(git rev-parse HEAD^)" = 79ca87e7f51542a8a70e1afab19f2a23ea81dd51
-          test "$(git rev-parse HEAD~5)" = 75e921ebf640efb61f6fb558659198c9afbc0aac
+          test "$(git rev-parse HEAD^)" = 92a00c72062e0e219b7f35562a3efabc340eff85
+          test "$(git rev-parse HEAD~6)" = 75e921ebf640efb61f6fb558659198c9afbc0aac
           cat release-patches/v116.part-* > /tmp/nlb-v116.patch
           test "$(shasum -a 256 /tmp/nlb-v116.patch | cut -d' ' -f1)" = cb740c06cbce6dc4365e3102e83bb5136c139d3d77a6e65f234c6b01076f1925
           git apply --check /tmp/nlb-v116.patch
@@ -45,7 +45,14 @@ jobs:
           npx playwright install chromium
       - name: Test financial, contact and calendar workflows
         run: |
-          for f in tests/*.test.cjs; do node "$f"; done
+          for f in tests/*.test.cjs; do
+            if node "$f" > /tmp/nlb-test.log 2>&1; then cat /tmp/nlb-test.log; else
+              cat /tmp/nlb-test.log
+              msg=$(python3 -c 'from pathlib import Path; print(Path("/tmp/nlb-test.log").read_text()[-3000:].replace("%","%25").replace("\n","%0A").replace("\r","%0D"))')
+              echo "::error title=Failed test $f::$msg"
+              exit 1
+            fi
+          done
       - name: Commit verified source
         run: |
           git config user.name 'github-actions[bot]'
