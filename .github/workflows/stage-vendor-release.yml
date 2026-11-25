@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,7 +20,7 @@ jobs:
           node-version: '20'
       - name: Apply and verify tested source
         run: |
-          test "$(git rev-parse HEAD~5)" = b07d56f7764c96c5586a0abc16b778c3494f05b4
+          test "$(git rev-parse HEAD~6)" = b07d56f7764c96c5586a0abc16b778c3494f05b4
           cat release-patches/vendor-1.13.0.part-* > /tmp/nlb-vendor-release.patch
           git apply --check /tmp/nlb-vendor-release.patch
           git apply /tmp/nlb-vendor-release.patch
@@ -37,6 +37,7 @@ jobs:
           a9def8ffaf7500dc5474731e38ca287d4215ad70a687774687855b5f78446a6b  tests/vendor-workflow-local.test.cjs
           7721ae3e971182026e5edf4f580339d19af13a48d5d166e9167e1aa411ef2402  tests/calendar-daily-local.test.cjs
           HASHES
+          sed -i '' 's/runs-on: macos-14/runs-on: macos-15/' .github/workflows/release-mac.yml
       - name: Validate financial and application safeguards
         run: |
           node tests/payments-core.test.cjs
