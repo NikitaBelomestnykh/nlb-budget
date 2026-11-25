@@ -20,8 +20,8 @@ jobs:
           node-version: '20'
       - name: Apply and verify tested source
         run: |
-          test "$(git rev-parse HEAD^)" = c13b382bb8169c74336cdbcd3ac08e13c1d1abf5
-          test "$(git rev-parse HEAD~7)" = 7afee374578b5f3de865c587f3b4f823a6b497bc
+          test "$(git rev-parse HEAD^)" = 81f8f49d8ec62079713a5b17e71aca61f2064aa6
+          test "$(git rev-parse HEAD~8)" = 7afee374578b5f3de865c587f3b4f823a6b497bc
           cat release-patches/v115.part-* > /tmp/nlb-115.patch
           test "$(shasum -a 256 /tmp/nlb-115.patch | cut -d' ' -f1)" = c6c7edca6f8416d52a8f5f8147f063b9a1768efd3d170ed8152063afde825998
           git apply --check /tmp/nlb-115.patch
@@ -68,6 +68,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git restore .github/workflows/release-mac.yml
           git add -u
           git add build/installer.icns build/installer.png tests/calendar-export-v115.test.cjs tests/calendar-v115.test.cjs tests/contact-csv-v115.test.cjs tests/contact-edit-v115.test.cjs tests/legacy-contact-v115.test.cjs
           git commit -m 'Release v1.15.0 calendar, timeline and contact improvements'
