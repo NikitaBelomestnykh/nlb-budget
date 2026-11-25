@@ -1,0 +1,65 @@
+name: Stage and publish v1.16.1
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/stage-v1161.yml]
+permissions:
+  contents: write
+concurrency:
+  group: mac-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply and verify tested source
+        run: |
+          test "$(git rev-parse HEAD^)" = 184c7a8e4a7d6a30e8d41f5e4fa2efcbef186e8b
+          test "$(git rev-parse HEAD~2)" = e7c3caed5a61d7b9ca6c92b91104c4bbda43cd9d
+          test "$(shasum -a 256 release-patches/v1161.patch | cut -d' ' -f1)" = d92d76710d596cd12bd05896890bd6b1acf0875ff7d66a8034d913c091b7bd19
+          git apply --check release-patches/v1161.patch
+          git apply release-patches/v1161.patch
+          rm release-patches/v1161.patch
+          shasum -a 256 -c <<'HASHES'
+          7f424cdc64856ea05d6027b70970ed545897111299f8e9452b39aec0f3db93a4  index.html
+          a775539f8abd5c3fd249fef40f891361f5e6c9b7f1748e32a6af93038d4f414e  assets/payments.css
+          f35d8c13c3907dca52ab6315e62c8364932d7832a2fca001cdf81fb8326c7ee1  PAYMENTS.md
+          89b16d753f327a9fc1d6bca1dc3485c72296f53c80292b58c98481b00f45be38  USER_GUIDE.md
+          49c57b84346ac6117535125bf91627f6b3dcbe2dae8d2e5c133f9f7e946596dd  package.json
+          f58db42528992504332c6a78d8f63312d48aacfa239f6e8173c7299f6cd84717  tests/design-v116.test.cjs
+          1debaa7c3af738ea89941c7172e6ae86488436779a35e4196007719cc43abb76  tests/grouping-v1161.test.cjs
+          HASHES
+      - name: Install dependencies and browser
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install chromium
+      - name: Test financial, contact and calendar workflows
+        run: |
+          for f in tests/*.test.cjs; do
+            if node "$f" > /tmp/nlb-test.log 2>&1; then cat /tmp/nlb-test.log; else
+              cat /tmp/nlb-test.log
+              msg=$(python3 -c 'from pathlib import Path; print(Path("/tmp/nlb-test.log").read_text()[-3000:].replace("%","%25").replace("\n","%0A").replace("\r","%0D"))')
+              echo "::error title=Failed test $f::$msg"
+              exit 1
+            fi
+          done
+      - name: Commit verified source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          git add tests/grouping-v1161.test.cjs
+          git commit -m 'Release v1.16.1 grouped payment and allocation views'
+          git push origin HEAD:main
+      - name: Build and publish Apple Silicon Mac release
+        run: npm run release:mac -- --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
