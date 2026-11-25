@@ -21,7 +21,7 @@ jobs:
           node-version: '20'
       - name: Apply and verify tested source
         run: |
-          test "$(git rev-parse HEAD^)" = 9732aeab031132637d680ed0b0d2de2b94273561
+          test "$(git rev-parse HEAD^)" = 896efc336561068d3ef77b08ac226c8ce14ae093
           git merge-base --is-ancestor e367eab0a6fa25c086b1257cc7ce43e7e9b0bcf4 HEAD
           cat release-patches/visual-1.14.0.part-* > /tmp/nlb-114.patch
           test "$(shasum -a 256 /tmp/nlb-114.patch | cut -d' ' -f1)" = 8ab005d5517ae94765e39b3e3bc7ccebec3701306c9d8e82c90d7d68e2d0bb40
@@ -54,13 +54,14 @@ jobs:
           npx playwright install chromium
       - name: Validate contact, calendar and backup workflows
         run: |
-          node tests/vendor-example-local.test.cjs
-          node tests/vendor-workflow-local.test.cjs
-          node tests/calendar-daily-local.test.cjs
-          node tests/vendor-upload-button.test.cjs
-          node tests/vendor-visual.test.cjs
-          node tests/timeline-calendar.test.cjs
-          node tests/crew-cast.test.cjs
+          for f in tests/vendor-example-local.test.cjs tests/vendor-workflow-local.test.cjs tests/calendar-daily-local.test.cjs tests/vendor-upload-button.test.cjs tests/vendor-visual.test.cjs tests/timeline-calendar.test.cjs tests/crew-cast.test.cjs; do
+            echo "Running $f"
+            if node "$f" > /tmp/nlb-test-output.txt 2>&1; then cat /tmp/nlb-test-output.txt; else
+              cat /tmp/nlb-test-output.txt
+              node -e "const s=require('fs').readFileSync('/tmp/nlb-test-output.txt','utf8').slice(-5000).replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A'); console.log('::error::'+process.argv[1]+': '+s)" "$f"
+              exit 1
+            fi
+          done
       - name: Commit verified source
         run: |
           git config user.name 'github-actions[bot]'
