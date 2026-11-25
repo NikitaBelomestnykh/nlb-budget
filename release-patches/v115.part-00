@@ -1,0 +1,228 @@
+diff --git a/.github/workflows/release-mac.yml b/.github/workflows/release-mac.yml
+index bbb24f0..76bc42a 100644
+--- a/.github/workflows/release-mac.yml
++++ b/.github/workflows/release-mac.yml
+@@ -24,8 +24,14 @@ jobs:
+           node tests/guide.test.cjs
+           node tests/navigation.test.cjs
+           node tests/budget-pdf.test.cjs
+-      - name: Install dependencies
+-        run: npm install --no-audit --no-fund
++      - name: Install dependencies and browser
++        run: |
++          npm install --no-audit --no-fund
++          npm install --no-save --no-audit --no-fund playwright
++          npx playwright install chromium
++      - name: Validate contact, calendar and backup workflows
++        run: |
++          for f in tests/*.test.cjs; do node "$f"; done
+       - name: Build and publish Apple Silicon Mac release
+         run: npm run release:mac -- --arm64
+         env:
+diff --git a/PAYMENTS.md b/PAYMENTS.md
+index 608667d..9060017 100644
+--- a/PAYMENTS.md
++++ b/PAYMENTS.md
+@@ -1,4 +1,4 @@
+-# Payments, timeline and documents — v1.14.0
++# Payments, timeline and documents — v1.15.0
+ 
+ See [the current user guide](USER_GUIDE.md) for Quick start, task guides, FAQ, closeout, backup and troubleshooting instructions. This replaces the old release-by-release instruction appendices.
+ 
+@@ -33,4 +33,4 @@ The main Export & Share budget PDF follows the approved grey-shaded Top Sheet/de
+ 
+ ## Crew, cast and visual timelines
+ 
+-Crew and Cast are separate views of the shared local contact book. Choose all relevant categories when creating or editing a contact; an existing uncategorized contact remains under Vendors until categorized. Deal memos, W-9/W-2 files and other agreements stay local, with full originals in workspace backups and referenced-contact originals in single-budget backups. These backups are sensitive. The app does not process or file tax forms. Vendor logos are locally stored and backed up with contact information. Production phases and custom milestones are shown on a shared date axis; the main calendar scrolls through months without changing financial calculations.
++Crew and Cast are separate views of the shared local contact book. Choose one category when creating or editing a contact; existing multi-category records remain unchanged until explicitly edited. Crew and Cast CSV import maps columns, previews rows and creates additive contacts without overwriting existing records. Dietary preferences and allergies are stored locally. Deal memos, W-9/W-2 files and other agreements stay local, with full originals in workspace backups and referenced-contact originals in single-budget backups. These backups are sensitive. The app does not process or file tax forms. Vendor logos are edited via the circle in Edit contact and backed up with contact information. Production phases, custom milestones and funding appear on a shared date axis. Calendar ranges govern screen, PDF, CSV and .ics snapshots; neither calendar syncs or creates an external calendar.
+diff --git a/RELEASE_CHECKLIST.md b/RELEASE_CHECKLIST.md
+index 58896ce..a888087 100644
+--- a/RELEASE_CHECKLIST.md
++++ b/RELEASE_CHECKLIST.md
+@@ -1,4 +1,4 @@
+-# v1.13.0 release-readiness checklist
++# v1.15.0 release-readiness checklist
+ 
+ ## Verified locally
+ - [x] Financial core, cache and lifecycle/refund invariants.
+@@ -12,7 +12,7 @@
+ 
+ ## Real-device checks — still pending
+ Use fictional test data and external backups. Do not delete production app data or replace your personal calendar.
+-- [ ] On an Apple Silicon Mac, back up important budgets/workspace, replace the app from the new DMG and confirm About shows v1.13.0.
++- [ ] On an Apple Silicon Mac, back up important budgets/workspace, replace the app from the new DMG and confirm About shows v1.15.0.
+ - [ ] Reopen existing budgets; compare totals, Actuals, invoices and payment history; preview original documents.
+ - [ ] Test a payment with receipt and explicit receipt skip; add evidence later; check a partial payment and refund.
+ - [ ] Import a full workspace into a separate safe test installation/profile. Confirm contacts, folders, payment records and original document bytes.
+@@ -40,3 +40,10 @@ Automatic document reading, bank transfers/reconciliation, payroll calculations,
+ - [x] Multiple vendor agreement originals and single-budget/workspace restore; malformed agreement data rejects without state changes.
+ - [ ] On a Mac, add signed test agreements, link two lines, create and record payments, then verify calendar totals and preview/download files.
+ - [ ] Restore budget and whole-workspace backups into a separate safe profile and check original agreement bytes and vendor links.
++
++## Contacts and calendars — v1.15.0
++- [x] Local Chromium tests: CSV mapping and quoted data, single-category selection, legacy multi-category preservation, dietary fields, staged logos, preview breadcrumb and backup of agreements.
++- [x] Local Chromium tests: daily totals and overflow, Today, scrolling and equal week heights; selected calendar range matches PDF/CSV/ICS; $4,500 location and partial payment.
++- [ ] On a real Mac, test CSV mapping, agreement preview breadcrumb, logo upload/cancel and full backup/restore using fictional sensitive data.
++- [ ] Confirm the mounted installer volume has its distinctive eject icon. The downloaded DMG file icon is controlled by Finder and remains unverified; the installed app retains its app icon.
++- [ ] Create new dedicated Apple and Google test calendars manually and import an .ics range; confirm event dates, amounts and filtering. The app does not create external calendars or sync them.
+diff --git a/USER_GUIDE.md b/USER_GUIDE.md
+index 237c433..b804d9b 100644
+--- a/USER_GUIDE.md
++++ b/USER_GUIDE.md
+@@ -1,4 +1,4 @@
+-# NO LONGER BUDGET — User guide (v1.14.0)
++# NO LONGER BUDGET — User guide (v1.15.0)
+ 
+ Current workflow; release history lives in GitHub and the Build Log.
+ 
+@@ -65,15 +65,11 @@ Click the **# heading → Renumber**. Accounts renumber by hundreds within the c
+ 
+ ### Setup, globals and live expressions
+ 
+-**Crew and Cast:** In Payments & Timeline, use the Crew and Cast tabs for individual contacts. Choose one or more categories when creating or editing a contact; existing contacts stay in Vendors until categorized. A contact shared across categories is one record, with one set of locally stored agreements. Add deal memos, W-9/W-2 files and other documents from the contact dashboard. The app does not process or file tax forms. Full backups include these sensitive files; protect backup copies.
++**Crew and Cast:** Use their tabs for individual contacts; choose one category when saving. Older multi-category contacts remain unchanged until edited. Use **Import CSV** to map columns and preview contacts before creating new records. Imports do not overwrite existing contacts; check for duplicates. Dietary preferences and allergies may be stored in the contact. Agreements and sensitive details remain local and are included in backups.
+ 
+-**Timeline:** Production phases and custom milestones appear visually on a shared date axis. The Calendar tab scrolls through months; its month selector controls the downloaded month.
++**Vendor dashboard:** Add a vendor, open it, upload agreements and link unassigned budget lines. Schedule each line separately. Use **Edit contact** and the circular logo button to add, change or remove a logo; save the contact to keep the change. Agreements are reusable on this computer; budget lines and payments are budget-specific.
+ 
+-**Vendor dashboard:** Choose Setup → Vendors, add a vendor, and open its dashboard. Add signed agreements (100 MB per file), link unassigned detail lines, then schedule payments on each line. The dashboard shows expected final, net paid, scheduled unpaid, unscheduled amounts and a monthly calendar with daily due totals for this budget. Vendor agreements are reusable on this computer; lines and payment records are budget-specific.
+-
+-**Setup** opens Globals, Units, Fringes, Groups, Currency, Vendors, Payments & Timeline, Timeline & Funding and Documents. Close a manager/workspace with its × control. Vendors are a shared contact book; budget setup and payment records belong to the selected budget.
+-
+-Setup → Globals stores named numbers, text or expressions referencing other globals, such as `Day Rate * 5`. Type a global name directly into Description, QTY, UNIT, X or RATE; autocomplete helps. There is no chain-link button. Leaving a field displays the resolved value; selecting it restores the expression. Updates propagate to references. Uses counts name occurrences in detail fields and other globals—not just distinct rows.
++Setup opens Globals, Units, Fringes, Groups, Currency, Vendors, Payments & Timeline, Timeline & Funding and Documents. Globals hold reusable numbers, text or expressions such as `Day Rate * 5`. Type a global name into Description, QTY, UNIT, X or RATE; click the computed value to edit its expression.
+ 
+ ### Fringes and groups without double-counting
+ 
+@@ -133,11 +129,9 @@ Use **Correct / reverse** for an erroneous posting, not a genuine refund. Origin
+ 
+ ### Production dates, funding and cash flow
+ 
+-Setup → Timeline & Funding sets optional pre-production/production/post-production dates, custom milestones, opening cash and its as-of date. Save timeline switches to a read-only summary; Edit timeline restores editing. Expected and received funding have separate amounts/dates.
++Use **Edit timeline** on the production timeline to enter phase dates and opening cash. Select Custom milestone or Incoming funding beside **Add milestone**. The chart shows phase spans, custom milestones and dated funding with day/week divisions. Funding expected and received amounts/dates are distinct; an expectation does not record receipt.
+ 
+-Unpaid milestone-relative dates move when their milestone moves. Fixed dates and historical paid dates stay unchanged. Positive offsets mean days after; negative offsets mean days before. Cash Flow is budget-wide: it includes movements on/after the opening date, while earlier movements are already represented by opening cash. Expected funding is not money already in the bank.
+-
+-Unallocated costs and undated installments remain **Not scheduled yet**. Contingency is a reserve, not invented dated spending. A reserve-funded allocation reduces remaining reserve without adding a second payment. Check missing dates and incoming funding before relying on a forecast.
++Unpaid milestone-relative dates move with their milestone. Fixed dates and historical paid dates stay unchanged. Cash Flow is budget-wide and includes movements on or after the opening date; earlier movements are already reflected in opening cash. Unallocated and undated costs remain Not scheduled yet. Contingency is a reserve, not invented dated spending.
+ 
+ ### Documents, privacy, archives and ZIP selection
+ 
+@@ -161,13 +155,11 @@ Under PDF layout enter Budget producer (Prepared by), Shoot location and Cast/Cr
+ 
+ ### Calendar snapshots and date ranges
+ 
+-The vendor dashboard calendar shows that vendor’s unpaid linked-line allocations summed by due date; choose an item to manage it. The separate Calendar tab shows budget-wide daily planned totals and can include paid history or incoming funding. Undated payments do not appear on either calendar.
+-
+-In Downloads choose **One calendar month** or **From / To dates**. PDF and .ics use the same inclusive boundaries, payment scope and history setting. Include paid payments, refunds & received funding to include history. Undated entries cannot be plotted; expected refunds remain forecast incoming items.
++The Calendar tab displays scoped daily due totals. Choose **Week, Month, Year, Max**, or inclusive **From / To** dates. The same range, filters and history setting govern the display and its PDF, CSV and .ics downloads. Week, Month and Year use the current calendar period; Max spans the earliest through latest dated transaction, or the current month if none. Today returns to the current month. The outlined day is today. Scroll within the selected range. Select **View details** or **+ more** for all items on a crowded day. Arrows distinguish money in and out; green denotes paid/received, yellow denotes past-due unpaid. Undated items cannot appear.
+ 
+-PDF creates a page for each touched month with additional detail pages for crowded dates. A PDF range is limited to 10 years; .ics can cover longer ranges. Empty ranges produce no invented events. Calendar-view buttons use its displayed month; Custom date range… opens Downloads.
++The contact dashboard has a separate scrollable calendar and Today button. Shared payments show only that contact’s linked-line allocations. Downloads has its own calendar controls. PDF ranges are limited to ten years; CSV and .ics can cover longer ranges.
+ 
+-Import .ics into a new dedicated Apple/Google calendar. For an updated snapshot, delete only that old dedicated calendar and import into a new one. There is no live sync; the app does not create/delete external calendars. Live import on your calendar service still needs verification.
++.ics is an import-once snapshot, not live synchronization. First create a dedicated calendar in Apple Calendar (File → New Calendar) or Google Calendar (Settings → Add calendar → Create new calendar), then import the file into it. For a replacement snapshot, remove only the old dedicated calendar and import into another new one. The app does not create or delete calendars; real-device imports need verification.
+ 
+ ### Saving, full backups and safe restoration
+ 
+diff --git a/assets/guide.js b/assets/guide.js
+index 37cc2dd..dde4c60 100644
+--- a/assets/guide.js
++++ b/assets/guide.js
+@@ -33,7 +33,7 @@ window.NLBGuide = [
+   {
+     "group": "How-to guides",
+     "title": "Setup, globals and live expressions",
+-    "body": "<p><b>Crew and Cast:</b> In Payments &amp; Timeline, use the Crew and Cast tabs for individual contacts. Choose one or more categories when creating or editing a contact; existing contacts stay in Vendors until categorized. A contact shared across categories is one record, with one set of locally stored agreements. Add deal memos, W-9/W-2 files and other documents from the contact dashboard. The app does not process or file tax forms. Full backups include these sensitive files; protect backup copies.</p><p><b>Timeline:</b> Production phases and custom milestones appear visually on a shared date axis. The Calendar tab scrolls through months; its month selector controls the downloaded month.</p><p><b>Vendor dashboard:</b> choose Setup → Vendors, add a vendor, then open its dashboard. Add as many signed agreements as needed (100 MB per file), choose Link budget lines and select unassigned detail lines. Each linked line can have one or more individually dated payments. The dashboard shows expected final, net paid, scheduled unpaid, unscheduled amounts and a monthly calendar with daily due totals for this budget. Agreements are shared with the reusable vendor on this computer; the budget lines and payment history are budget-specific.</p><p><b>Setup</b> opens Globals, Units, Fringes, Groups, Currency, Vendors, Payments &amp; Timeline, Timeline &amp; Funding and Documents. Close a manager/workspace with its × control. Vendors are a shared contact book; budget setup and payment records belong to the selected budget.</p><p>Setup → Globals stores named numbers, text or expressions referencing other globals, such as <code>Day Rate * 5</code>. Type a global name directly into Description, QTY, UNIT, X or RATE; autocomplete helps. There is no chain-link button. Leaving a field displays the resolved value; selecting it restores the expression. Updates propagate to references. Uses counts name occurrences in detail fields and other globals—not just distinct rows.</p>"
++    "body": "<p><b>Crew and Cast:</b> In Payments &amp; Timeline, use the Crew and Cast tabs for individual contacts. Choose exactly one category when saving a contact. Older contacts with multiple categories remain unchanged until edited, when one must be chosen. In Crew or Cast, Import CSV lets you map columns and preview rows before adding new contacts. Imports never overwrite existing contacts; review for duplicates. Dietary preferences and allergies can be stored in contact details. Add deal memos, W-9/W-2 files and other documents from the contact dashboard. The app does not process or file tax forms. Full backups include these sensitive files; protect backup copies.</p><p><b>Timeline:</b> Production phases, custom milestones and funding appear on a shared date axis. In Calendar, the selected range controls the display and downloads.</p><p><b>Vendor dashboard:</b> choose Setup → Vendors, add a vendor, then open its dashboard. Add or change a logo in Edit contact using the circular button; save to keep it. Add as many signed agreements as needed (100 MB per file), choose Link budget lines and select unassigned detail lines. Each linked line can have one or more individually dated payments. The dashboard shows expected final, net paid, scheduled unpaid, unscheduled amounts and a monthly calendar with daily due totals for this budget. Agreements are shared with the reusable vendor on this computer; the budget lines and payment history are budget-specific.</p><p><b>Setup</b> opens Globals, Units, Fringes, Groups, Currency, Vendors, Payments &amp; Timeline, Timeline &amp; Funding and Documents. Close a manager/workspace with its × control. Vendors are a shared contact book; budget setup and payment records belong to the selected budget.</p><p>Setup → Globals stores named numbers, text or expressions referencing other globals, such as <code>Day Rate * 5</code>. Type a global name directly into Description, QTY, UNIT, X or RATE; autocomplete helps. There is no chain-link button. Leaving a field displays the resolved value; selecting it restores the expression. Updates propagate to references. Uses counts name occurrences in detail fields and other globals—not just distinct rows.</p>"
+   },
+   {
+     "group": "How-to guides",
+@@ -73,7 +73,7 @@ window.NLBGuide = [
+   {
+     "group": "How-to guides",
+     "title": "Production dates, funding and cash flow",
+-    "body": "<p>Setup → Timeline &amp; Funding sets optional pre-production/production/post-production dates, custom milestones, opening cash and its as-of date. Save timeline switches to a read-only summary; Edit timeline restores editing. Expected and received funding have separate amounts/dates.</p><p>Unpaid milestone-relative dates move when their milestone moves. Fixed dates and historical paid dates stay unchanged. Positive offsets mean days after; negative offsets mean days before. Cash Flow is budget-wide: it includes movements on/after the opening date, while earlier movements are already represented by opening cash. Expected funding is not money already in the bank.</p><p>Unallocated costs and undated installments remain <b>Not scheduled yet</b>. Contingency is a reserve, not invented dated spending. A reserve-funded allocation reduces remaining reserve without adding a second payment. Check missing dates and incoming funding before relying on a forecast.</p>"
++    "body": "<p>Setup → Timeline &amp; Funding sets optional pre-production/production/post-production dates, custom milestones, opening cash and its as-of date. Use Edit timeline in the visual timeline to change production dates and opening cash. Select Custom milestone or Incoming funding beside Add milestone; both appear on the date axis. Expected and received funding have separate amounts/dates and an expectation does not record receipt.</p><p>Unpaid milestone-relative dates move when their milestone moves. Fixed dates and historical paid dates stay unchanged. Positive offsets mean days after; negative offsets mean days before. Cash Flow is budget-wide: it includes movements on/after the opening date, while earlier movements are already represented by opening cash. Expected funding is not money already in the bank.</p><p>Unallocated costs and undated installments remain <b>Not scheduled yet</b>. Contingency is a reserve, not invented dated spending. A reserve-funded allocation reduces remaining reserve without adding a second payment. Check missing dates and incoming funding before relying on a forecast.</p>"
+   },
+   {
+     "group": "How-to guides",
+@@ -88,7 +88,7 @@ window.NLBGuide = [
+   {
+     "group": "How-to guides",
+     "title": "Calendar snapshots and date ranges",
+-    "body": "<p>The vendor dashboard calendar shows that vendor’s unpaid linked-line allocations, summed by due date; choose a calendar item to manage its payment. The separate Calendar tab shows budget-wide daily planned totals and can include paid history or incoming funding. Undated payments do not appear on either calendar.</p><p>In Downloads choose <b>One calendar month</b> or <b>From / To dates</b>. PDF and .ics use the same inclusive boundaries, payment scope and history setting. Include paid payments, refunds &amp; received funding to include history. Undated entries cannot be plotted; expected refunds remain forecast incoming items.</p><p>PDF creates a page for each touched month with additional detail pages for crowded dates. A PDF range is limited to 10 years; .ics can cover longer ranges. Empty ranges produce no invented events. Calendar-view buttons use its displayed month; Custom date range… opens Downloads.</p><p>Import .ics into a new dedicated Apple/Google calendar. For an updated snapshot, delete only that old dedicated calendar and import into a new one. There is no live sync; the app does not create/delete external calendars. Live import on your calendar service still needs verification.</p>"
++    "body": "<p>The Calendar tab displays scoped daily due totals. Select Week, Month, Year, Max or inclusive From / To dates; this same range and the selected history/filter settings control PDF, CSV and .ics downloads on this screen. Week, Month and Year use the current calendar period; Max spans the earliest to latest dated transaction, or the current month if none. Today returns to the current month. The outlined day is today. Scroll through months inside the selected range; select View details or + more to see all entries on crowded days. Outgoing and incoming arrows identify direction; green denotes paid/received and yellow denotes past-due unpaid amounts. Undated items cannot appear.</p><p>The contact dashboard has a separate scrollable calendar of that contact’s linked-line transactions and a Today button. Shared transactions show only linked-line allocations. Downloads also has its own calendar date controls. PDF ranges are limited to ten years; CSV and .ics can cover longer ranges.</p><p>.ics is an import-once snapshot, not synchronization. First create a new dedicated calendar in Apple Calendar (File → New Calendar) or Google Calendar (Settings → Add calendar → Create new calendar), then import the file into it. For a replacement snapshot, remove only the old dedicated calendar and import into another new one. The app does not create or delete external calendars; real-device imports need verification.</p>"
+   },
+   {
+     "group": "How-to guides",
+diff --git a/assets/payments.css b/assets/payments.css
+index 3aa97e2..e4ee22f 100644
+--- a/assets/payments.css
++++ b/assets/payments.css
+@@ -97,3 +97,9 @@ input[type="date"],input[type="month"]{color-scheme:light}input[type="date"]::-w
+ #pm-layer .pm-contact-roles { border:1px solid var(--pm-border, #555); border-radius:8px; padding:12px; margin:0 0 16px; }
+ #pm-layer .pm-contact-roles label { display:inline-flex; align-items:center; gap:6px; margin-right:20px; }
+ #pm-layer .pm-contact-roles input { width:16px; min-height:16px; }
++.vd-logo-editor{display:flex;align-items:center;gap:12px;margin:0 0 16px}.vd-logo-edit{width:64px;height:64px;padding:0;border:1px solid var(--border,#555);border-radius:50%;display:grid;place-items:center;background:transparent;overflow:hidden;cursor:pointer}.vd-logo-edit .vd-logo{width:100%;height:100%}.vd-logo-plus{font-size:32px;line-height:1}
++.pt-axis{display:block;position:relative;margin:0 59px 2px 190px;height:27px}.pt-axis-inner{position:relative;height:100%}.pt-tick{position:absolute;top:8px;font-size:10px;white-space:nowrap}.pt-week-tick{font-weight:700;top:0}.pt-track{background-image:linear-gradient(to right,var(--border) 1px,transparent 1px)}.pt-funding-received{background:#52b76e}.pt-overview .pm-card-heading>div:last-child{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
++.pm-calendar-stream .pm-calendar{grid-auto-rows:116px;grid-template-rows:30px}.pm-calendar-stream .pm-day{min-height:0;height:116px;box-sizing:border-box;overflow:hidden}.pm-calendar-stream .pm-day-today,.vd-day-today{box-shadow:inset 0 0 0 3px #f5b62f}.pm-day-outside{opacity:.45}.pm-event.pm-event-upcoming{background:var(--row-alt)}.pm-event.pm-event-late{background:#a5742344}.pm-event.pm-event-paid{background:#40a85c3d}.pm-calendar-stream .pm-event{max-height:55px;overflow:hidden;line-height:1.25}.pm-calendar-stream .pm-day button{padding:2px 4px;min-height:22px;font-size:10px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
++.vd-calendar-stream{height:min(62vh,640px);min-height:320px;overflow:auto;overscroll-behavior:contain;border:1px solid var(--border);border-radius:8px;padding:0 12px}.vd-month-panel{min-width:700px;padding:12px 0 18px}.vd-month-panel h4{margin:0 0 10px}.vd-calendar{grid-auto-rows:116px;grid-template-rows:36px}.vd-day{height:116px;min-height:0;box-sizing:border-box;overflow:hidden}.vd-day .pm-event{display:block;max-height:50px;overflow:hidden;font-size:11px;padding:4px}.vd-day button{min-height:22px;padding:2px 4px;font-size:10px}.vd-day .vd-due{font-size:11px;margin:3px 0}
++.pm-calendar-stream .pm-calendar{grid-auto-rows:150px}.pm-calendar-stream .pm-day{height:150px}.vd-calendar{grid-auto-rows:150px}.vd-day{height:150px}.pm-calendar-controls .pm-field{flex:0 1 150px}.pm-calendar-controls .pm-field input,.pm-calendar-controls .pm-field select{width:100%}@media(max-width:700px){.pt-overview .pm-card-heading{align-items:flex-start;flex-direction:column;gap:12px}.pm-calendar-controls .pm-field{flex:1 1 130px}}
++.pt-row .pt-label{position:sticky;left:0;z-index:2;background:var(--canvas)}.pt-row>button{position:sticky;right:0;z-index:2}
+diff --git a/build/installer.icns b/build/installer.icns
+new file mode 100644
+index 0000000000000000000000000000000000000000..d1ecc22a276cb613555c44ec1d281e45b3be94c0
+GIT binary patch
+literal 81283
+zcmeFZWmHws-!8gAK%|wHMx-01OAtW>>2B#}(;X^ZD%~goB5XROyJJho1~%Q@&6)n+
+z@!m1cJzviGbnb`iz`cMm*P3(9`J2CZo@Zih>fi!F5&NXBBuxu}K;*1VxdkAQ$7A3s
+z2!Sw-f~yb&q9AK+%EJwT2r7Up4+QeS5L|g7kcUCw%J*OGcwYQhyZ^dBT=~5$F4j{l
+z@J!sda<5gvHSphmObqbZE^g8fI*EJx`jxt8`tF>MXZ(0j_u;-5mrJibYOV2)mmyyW
+z^f<As%HR%#%-IvwTkbGzM5m@bOcOd+x2;PJ)2`>Js@8)cupJC`RyR$@NpjH(f9aL6
+z63NgKd<?POtEq)I?E4Je@h}8_^Gq>GBZseht)a9H_%M0}tf!xgtq(l1O3kzWKltLG
+z4>vVvxx2lN{MNe?`k8>~9m{sS>RK5mU)CeKc!CdE)~N_FIAY}QUv5{0ei6-w^JS*p
+zW{Bz%A}M|L&sMCgtWQErC<~XcB2*(@(+6$W?Mj7dsP<*?zj)E$&feGO1#zg~<zIHm
+zx}H5vG@sK|RaGUA?6N{uq@4-4kIs!ouY2F)@4mm|{rt+@9No>$E!|a>>br87Ham%%
+z!TEKFiEl+ylXy!1k+V0euAbg)h{?^*pFb~-3)EBBC!1Rcm5TCU_N0fNsLHjR<q#GK
+zY7oTDjmdeh7F+0eAXY_FSDxX?r71f}y<Jxn`GZ<k4ogeZ_7GfmW}+)EW}-T~`@7ql
+z6HEMqo8xU1%-}xEgoH)>3!cw-E!y#_KS!+F7BQuzP4p*M$JCS--)R}isHr_$bh==H
+zA9Fg`*kG;yXh_e9o|u?G^!4{UA}cKMJ^Z#sDyyrXU<LnzrF=HQ#K6D^e@*|VIIWN#
+z`<r!Ye0)5&NgEnYdv--dT2l~8Oi96FqMn1rOr<pr4o;Dkon1r3;u<}+&?8AbJ%k;i
+z`hG{yVPVK|zB2@uqTu)MpVbymuFq)}T7vK>yJfWQJl?Pbo9n1+X{l&w$tpS0WMmj9
+zSX&uSmm?kpOEEkNSK@#964qB;q;HUj)YsRi)UL3=r4YDF2q$Dx*5eDGn8?_fZ+r+p
+z=2m>r{x{a+h+B~`m*^p$YpFeg|2Hd>s)k1IP&L2*HA43A(w8g*+F$3kU1X=EKY=n;
+z=VqH>LbeW;?66}?Vxhv`#wI4G(GS0|(JwhK{IABn7>{Dy_wSe@9@RY7s>CufGNPv^
+zqYcCJG4_c3$%%=fzUru=2Mg!da8?!;7QfvpjvYizRyZ*sbi`U%M1)6CY%Pvs^u@;R
+zF4L13WeuHI0rwCJ!+AL<w9J~U>vEb}g4CdevYp#%x``^6=zF<pU46YW>-Kh>sT9ir
+zgCOTmN|`<tL5DTl<r9u)Xs+(=Dyphc)~S`1l?z_fQej1UfkoE@xnpLNZkrn$9p&tH
+z2zttxn0gE3Vaq8Iik>pn6ZKFWsZLaa*H6A>(#a@kKT%>)kT%v^w(O9?e8o;8jTwa8
+z&nc`A1!hmM)Zw;0p<|ihHsRA$)ptkV#(kqIuUatH(;2xeI8DuONy&A*-piDnF3{gC
+zo67P2H$My8lZzs0csL`GkN0z~U03bKRuh-{$Y<nUL&$FgsFQAoKSRxRe~z+<!XF$Y
+zB_>)VjOzRP*jy;aFv**zUaS$a7dO+k2=V!$eM0>y_4W(a?59O;w9gUfeD4%3__f(H
+zNf$0jLTQTROHGm@;ZMkxHxME_V1W5A@s2WlR6ph~L{vPObv5~-ToB|+<Z!hi!IjI4
+z&w@e}63AzHadDuYMsv^8>Q@-|hguumQ&G<e<;xRx?54w58GUiCz@s-3hf-!&UYB|I
+znppa>ivlLS!7?w#b#Jcw$fThfPISz_E_HGxSvv(dIhKwtQAD*CdvheTFy-pM$Q7!j
+zc@(rLvJGWzFZ&oVcUd;RWWOxVM*ZSUWRy;`G7^h^@XclbAv{Xrdw>4e!9eIUcW1KJ
+zje{zWV`6L?7i$|7n+*k>Ft8GvZ=1v6#*ARIfTtveJ!_$MkY&$^YE=u~>2(2zD%?+L
+zc^T@KT~JC`!cV@sVlkniKZc-dW6Yiu(00l!Ep*Nfr{rbVBbO5&K7{HAn`1Q{_H)C0
+zDA{dK2$<3HPz3yV<#d#Z6tt8HP@METi!dUa@4rL~yxAo}Wr#rdKh8T1jI@8G@Sv`p
+z`u^;gZppe=yKq9EG;dsQAZ_oN0j<HSS7?%~7h{{^?0Qji``2h}SrNxQ*wBwn(p6%{
+z*moYb5j3JCon$%0WbTWhe#y($#<bX8G?3hEcIIS}@uAt9*tT-?G{ng4X&QIp<wP9m
+z!6W}l;l8Z9)Q+R*VPek+wJi=C#xRwA?xVN!4_gwPq=I`7iMxI=b#T)@Nt!)cAdrTJ
+zd&TeTh7IVqjwDFCo_HtAK6+%v7|oc7^)!YL+Ks8-)N>7yEBFN?K=aFiuaPG%h~Ue5
+zmc5KdQa8FI60>2W=9|*ea=C8|S{W2t!!^48WQh3+9En5ZUumSYTIC2O8kKGZqv7AM
+zxW8_eNX=F{xK4Ufq)pLIxqFGq7(B4^aH%_}0UyF`qgch>O7T$N;kuK+ChF;}MKz1|
+zo!sYWkrC~jO0s3Uy=^hJFv#mCTO7w9q$FRkTqY5J+SzhFT=|Yp>v--YCZja9+?9nl
+zBDO(wI>G&o`SX<#B<@uR-3H~CKgCi`%nw6YJWX7%SQZ<mTRj4dQNrVwHnqO_u9<eq
+zzDJdtnp}@AWLY|A-G5;Gw6sQRgj7X66mKrot9WT((|-+)WmZ+$t;p8Uj^Xz?@U?1L
+zq1p!`NmML)h?q%d;vA=C)|SYRJgkLiyrlS?c{dEAl*@a<!lGw3b=Gagjnwt^VnwJM
+zlE>l@NM^q02UB6fz)$RYrF-KHT6gOZtj?)pKgV3<Kh(ZHP@%{nR^iIL7J?h7TB^2u
+zV@`d<VKFW0LIs*q^V;9}O%*Ns1+T!sJ-WA(*-5qMr2BV2IKHY=Zb+P1TeJtZmYR+C
+zTkoh~L>wu;LTlm9=3=jPbo;n!#Ehb}C=}shadkOFyxO65WKg1`&dR5Dflu>@9{)Wz
+zdG$h&#B<Na(Pzq#DjF;X2*h9SpvP!rAS=b9)mnTu{)1FmtCqORw{e+lXWqgHF!+M;
+z)u8-u7hPnE0|MxT5W1FQ<4rEpF(qE>o51ii%^sDB2Tc@-&o`cax!Jyd9nL`1<iTy4
+z%!Rced`8g!IR>ToR3dU@elc38@H{5g8r!?=TY%x?T=NnwWhNRdcF31atm-{z?M)_T
+z!2FW&Wv7be{d^1^?=fac<Koe!54~v3AWO3Uy%Rbqr027-QPxVI&okd^0qB(}RzFwi
+zKw0-ea8D(Dq7i`-+uimdS`w1b1YwvYiE?@!%9d;!C{QstAlu}B@%rO9#i+jMB;2dQ
+zev2
