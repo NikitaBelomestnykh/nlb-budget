@@ -1,0 +1,60 @@
+name: Stage and publish v1.17.1
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/stage-v1171.yml]
+permissions:
+  contents: write
+concurrency:
+  group: mac-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply and verify tested source
+        run: |
+          test "$(git rev-parse HEAD^)" = 083a0c89ceb20256393d77ef032edfb749717cec
+          test "$(git rev-parse HEAD~2)" = 678424bac0aa0e0cc98f112bba23b141e5bec4ff
+          test "$(shasum -a 256 release-patches/v1171.patch | cut -d' ' -f1)" = 2b9581bec673c0a918a0035a51f3207307586f1a44beb50b5092f22caa12ca7a
+          git apply --check release-patches/v1171.patch
+          git apply release-patches/v1171.patch
+          rm release-patches/v1171.patch
+          shasum -a 256 -c <<'HASHES'
+          7387bb6999ddb18d3670db57aff56a329a6d6bc9d863d9c5f90aada63907b0ce  index.html
+          eb51f729281a915e1e38ce1f5758db5c84d9760ce29b54495e49dfdeebf57fbd  package.json
+          f3ac8c41716aabec30f0d8ee53480b6b925a514ec0a70d77184e0fc22116e540  tests/next-design-v117.test.cjs
+          HASHES
+      - name: Install dependencies and browser
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install chromium
+      - name: Test financial, contact and calendar workflows
+        run: |
+          for f in tests/*.test.cjs; do
+            if node "$f" > /tmp/nlb-test.log 2>&1; then cat /tmp/nlb-test.log; else
+              cat /tmp/nlb-test.log
+              msg=$(python3 -c 'from pathlib import Path; print(Path("/tmp/nlb-test.log").read_text()[-3000:].replace("%","%25").replace("\n","%0A").replace("\r","%0D"))')
+              echo "::error title=Failed test $f::$msg"
+              exit 1
+            fi
+          done
+      - name: Commit verified source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          git commit -m 'Release v1.17.1 preserve explicit unlink'
+          git push origin HEAD:main
+      - name: Build and publish Apple Silicon Mac release
+        run: npm run release:mac -- --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
