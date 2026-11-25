@@ -1,4 +1,4 @@
-# NO LONGER BUDGET — User guide (v1.12.0)
+# NO LONGER BUDGET — User guide (v1.13.0)
 
 Current workflow; release history lives in GitHub and the Build Log.
 
@@ -65,6 +65,8 @@ Click the **# heading → Renumber**. Accounts renumber by hundreds within the c
 
 ### Setup, globals and live expressions
 
+**Vendor dashboard:** Choose Setup → Vendors, add a vendor, and open its dashboard. Add signed agreements (100 MB per file), link unassigned detail lines, then schedule payments on each line. The dashboard shows expected final, net paid, scheduled unpaid, unscheduled amounts and a monthly calendar with daily due totals for this budget. Vendor agreements are reusable on this computer; lines and payment records are budget-specific.
+
 **Setup** opens Globals, Units, Fringes, Groups, Currency, Vendors, Payments & Timeline, Timeline & Funding and Documents. Close a manager/workspace with its × control. Vendors are a shared contact book; budget setup and payment records belong to the selected budget.
 
 Setup → Globals stores named numbers, text or expressions referencing other globals, such as `Day Rate * 5`. Type a global name directly into Description, QTY, UNIT, X or RATE; autocomplete helps. There is no chain-link button. Leaving a field displays the resolved value; selecting it restores the expression. Updates propagate to references. Uses counts name occurrences in detail fields and other globals—not just distinct rows.
@@ -86,6 +88,8 @@ Account/sub-account six-dot menus or currency signs open parent pages. Set a def
 A parent invoice is stored once. Apply it to included detail lines and review proportional, equal or manual base/fringe allocations. Exact shares must sum to the invoice total. Child pages show their shares, not repeated whole-invoice costs. Keep different suppliers on separate detail lines.
 
 ### Invoices and payment plans
+
+From a vendor dashboard, choose **Schedule payment** on a linked line, enter an amount and due date, and save. Repeat for separate dates; no recurring payment is created. This simple flow splits base/fringes proportionally and cannot exceed the unscheduled balance. Use the advanced plan for shared payments, percentages, milestone dates or a custom split. Planning does not post to Actuals. Record paid explicitly; a shared payment is recorded once for all allocations.
 
 **Add invoice…** records reference, type, recipient, issued/due dates, base/fringe amounts, note and supporting files. Duplicate references for the same recipient are rejected. Invoice information is entered manually; document reading is not implemented.
 
@@ -153,6 +157,8 @@ Under PDF layout enter Budget producer (Prepared by), Shoot location and Cast/Cr
 
 ### Calendar snapshots and date ranges
 
+The vendor dashboard calendar shows that vendor’s unpaid linked-line allocations summed by due date; choose an item to manage it. The separate Calendar tab shows budget-wide daily planned totals and can include paid history or incoming funding. Undated payments do not appear on either calendar.
+
 In Downloads choose **One calendar month** or **From / To dates**. PDF and .ics use the same inclusive boundaries, payment scope and history setting. Include paid payments, refunds & received funding to include history. Undated entries cannot be plotted; expected refunds remain forecast incoming items.
 
 PDF creates a page for each touched month with additional detail pages for crowded dates. A PDF range is limited to 10 years; .ics can cover longer ranges. Empty ranges produce no invented events. Calendar-view buttons use its displayed month; Custom date range… opens Downloads.
@@ -160,6 +166,8 @@ PDF creates a page for each touched month with additional detail pages for crowd
 Import .ics into a new dedicated Apple/Google calendar. For an updated snapshot, delete only that old dedicated calendar and import into a new one. There is no live sync; the app does not create/delete external calendars. Live import on your calendar service still needs verification.
 
 ### Saving, full backups and safe restoration
+
+Vendor agreements are sensitive, reusable local files. Whole-workspace backups include every vendor’s agreements, including unassigned and archived contacts. Single-budget backups include agreements only for referenced vendors. Agreements are not included in the budget document ZIP or binder; download them individually from the vendor dashboard. Imported originals receive independent storage keys. Each file is limited to 100 MB; there is no fixed limit on agreement count, though device storage still applies.
 
 The current installed app autosaves budgets/settings in **local app storage on this computer**. Original documents are stored separately in local document storage. It does not autosave independent .nlb files to Documents, cloud-sync, or provide native Save/Open. The Saved indicator is not proof of an external backup.
 
@@ -249,6 +257,8 @@ Archive preserves records/files/links and can be undone; it is not deletion or a
 Send reviewed PDF/Excel/CSV reports or a binder for reading; ZIP carries selected original documents. Keep .nlb for restoring one budget, or .nlb-workspace.json for all budgets/contacts/folders. Backups contain financial history and sensitive originals; they are not sanitized sharing files.
 
 ### Does a budget backup include my whole vendor contact book?
+
+A referenced vendor’s agreements are included with that vendor in a single-budget backup; agreements for unreferenced vendors are not. Whole-workspace backups include all vendor agreements.
 
 No. A single-budget .nlb includes referenced vendors only. Use Back up all budgets & contacts… for every contact, including unassigned/archived contacts, and all budgets/folders/documents. Import is additive; it does not overwrite existing budgets.
 

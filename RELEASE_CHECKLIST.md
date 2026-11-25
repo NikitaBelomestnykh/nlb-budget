@@ -1,4 +1,4 @@
-# v1.12.0 release-readiness checklist
+# v1.13.0 release-readiness checklist
 
 ## Verified locally
 - [x] Financial core, cache and lifecycle/refund invariants.
@@ -12,7 +12,7 @@
 
 ## Real-device checks — still pending
 Use fictional test data and external backups. Do not delete production app data or replace your personal calendar.
-- [ ] On an Apple Silicon Mac, back up important budgets/workspace, replace the app from the new DMG and confirm About shows v1.12.0.
+- [ ] On an Apple Silicon Mac, back up important budgets/workspace, replace the app from the new DMG and confirm About shows v1.13.0.
 - [ ] Reopen existing budgets; compare totals, Actuals, invoices and payment history; preview original documents.
 - [ ] Test a payment with receipt and explicit receipt skip; add evidence later; check a partial payment and refund.
 - [ ] Import a full workspace into a separate safe test installation/profile. Confirm contacts, folders, payment records and original document bytes.
@@ -34,3 +34,9 @@ Automatic document reading, bank transfers/reconciliation, payroll calculations,
 - [x] Full-detail/summary/title-page exports, portrait/landscape, font sizes, black-and-white shading, metadata, long-title/oversized-note pagination and protected footers.
 - [x] Export metadata persistence and exact original budget/ledger totals; payment/binder/calendar/CSV/Excel exporters unchanged.
 - [ ] Confirm native Mac print preview and Save as PDF preserve grey backgrounds and page counts.
+
+## Vendor dashboard — v1.13.0
+- [x] Two-line $4,500 location example, same-day totals, explicit partial payment and unchanged expected final.
+- [x] Multiple vendor agreement originals and single-budget/workspace restore; malformed agreement data rejects without state changes.
+- [ ] On a Mac, add signed test agreements, link two lines, create and record payments, then verify calendar totals and preview/download files.
+- [ ] Restore budget and whole-workspace backups into a separate safe profile and check original agreement bytes and vendor links.

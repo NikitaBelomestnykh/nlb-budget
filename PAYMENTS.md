@@ -1,4 +1,4 @@
-# Payments, timeline and documents — v1.12.0
+# Payments, timeline and documents — v1.13.0
 
 See [the current user guide](USER_GUIDE.md) for Quick start, task guides, FAQ, closeout, backup and troubleshooting instructions. This replaces the old release-by-release instruction appendices.
 
@@ -26,3 +26,7 @@ Automated browser/financial/backup/layout checks are supplemented by published-p
 
 ## v1.12.0 budget PDF
 The main Export & Share budget PDF follows the approved grey-shaded Top Sheet/detail design. Project headings repeat on every generated budget page. Export-only producer/location/agreements metadata and a principal-start override are saved per budget; a blank override follows Timeline production start without shifting payments. Base totals, fringes, contingency and Grand Total retain their existing calculations. Payment-report PDFs, binder, calendars, CSV and Excel are not reformatted in this release.
+
+## v1.13.0 vendor dashboards
+- Vendors have a visual directory and a per-vendor view for the selected budget. Link unassigned detail lines, schedule fixed dated amounts per line, record payments explicitly, and see daily unpaid totals in the vendor calendar. Advanced shared/percentage/milestone flows remain available.
+- Vendor agreements are stored locally with the reusable vendor, not in the budget document binder or ZIP. A single-budget backup includes agreement originals for referenced vendors; a workspace backup includes all vendor agreements. Originals are copied on restore. Each file may be up to 100 MB; there is no fixed number-of-agreements limit.
