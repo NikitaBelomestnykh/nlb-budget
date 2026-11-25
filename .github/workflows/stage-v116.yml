@@ -20,13 +20,16 @@ jobs:
           node-version: '20'
       - name: Apply and verify tested source
         run: |
-          test "$(git rev-parse HEAD^)" = 92a00c72062e0e219b7f35562a3efabc340eff85
-          test "$(git rev-parse HEAD~6)" = 75e921ebf640efb61f6fb558659198c9afbc0aac
+          test "$(git rev-parse HEAD^)" = 39bd3460e9767c4d45afa3da98a64c74a2fdf7e1
+          test "$(git rev-parse HEAD~8)" = 75e921ebf640efb61f6fb558659198c9afbc0aac
           cat release-patches/v116.part-* > /tmp/nlb-v116.patch
           test "$(shasum -a 256 /tmp/nlb-v116.patch | cut -d' ' -f1)" = cb740c06cbce6dc4365e3102e83bb5136c139d3d77a6e65f234c6b01076f1925
           git apply --check /tmp/nlb-v116.patch
           git apply /tmp/nlb-v116.patch
-          rm release-patches/v116.part-*
+          test "$(shasum -a 256 release-patches/v116-scrolling-test.patch | cut -d' ' -f1)" = f1b52cfc033d14ff330adb5688ced010c8f7d18ee1704a63910b84444991be8c
+          git apply --check release-patches/v116-scrolling-test.patch
+          git apply release-patches/v116-scrolling-test.patch
+          rm release-patches/v116.part-* release-patches/v116-scrolling-test.patch
           shasum -a 256 -c <<'HASHES'
           7717c11f7d33b9e0f7d1f0a610d0f21db52ea6ef42f98142e94a4b2211ed477d  index.html
           a7f317760d088b31421a995b45372041febcefafe13e5ebc153cdd7ab19fdcce  assets/payments.css
@@ -36,7 +39,7 @@ jobs:
           09b3c8b81e271816ff8ac08fa202b633765db96b7a7a116781d9c87984df9bea  package.json
           470666b78da52db420e6c5445b1933d85fc8802a9ea8c75f632d4062e637c624  tests/calendar-v115.test.cjs
           d01d69e1916c69f08d7d7d27a7eb4ca9f5a0e831fc84347eb02f8ca5a6cdf831  tests/design-v116.test.cjs
-          0fd203f583a4cdf305d94c32c74c7fc2ff827dc88accc5f89f30da3f7ca1c77b  tests/timeline-calendar.test.cjs
+          a5f6d249743814ce225a3966a9ded8ac68cd8923b5fb50ee1ae088896595cbaa  tests/timeline-calendar.test.cjs
           HASHES
       - name: Install dependencies and browser
         run: |
