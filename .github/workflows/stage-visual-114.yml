@@ -1,0 +1,76 @@
+name: Stage and publish 1.14.0 visual update
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/stage-visual-114.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mac-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply and verify tested source
+        run: |
+          test "$(git rev-parse HEAD^)" = 9732aeab031132637d680ed0b0d2de2b94273561
+          git merge-base --is-ancestor e367eab0a6fa25c086b1257cc7ce43e7e9b0bcf4 HEAD
+          cat release-patches/visual-1.14.0.part-* > /tmp/nlb-114.patch
+          test "$(shasum -a 256 /tmp/nlb-114.patch | cut -d' ' -f1)" = 8ab005d5517ae94765e39b3e3bc7ccebec3701306c9d8e82c90d7d68e2d0bb40
+          git apply --check /tmp/nlb-114.patch
+          git apply /tmp/nlb-114.patch
+          rm release-patches/visual-1.14.0.part-*
+          shasum -a 256 -c <<'HASHES'
+          3dd88570340d6fccb13e7fe3bbae55e16d4e6cff7982f061a7100775a984f8a4  index.html
+          89720b724b95dc40129ea97facb309263c333d15266254210d0f51162117ddad  assets/payments.css
+          c003c1d4e6af5970009403cd2601d20b341e09720c692ebab613adb902724fcf  assets/guide.js
+          cb1b1e836b49055cf90cb42a64e9c622db3324ac6c7b20749758467bed2ea503  PAYMENTS.md
+          90138728e5fad030e7080b80cf60523ba1210c944951a702eb23cc32975d69d0  USER_GUIDE.md
+          a4d354aea9c660ad2fc5a6a5cfafed1598f86c961cc40098dbddcb15ccecc184  package.json
+          2c87b4c2101724611ce95118dea9cb4d9846647ed17373aeafae0bcb4f2ed81f  tests/crew-cast.test.cjs
+          3de19be5105b0d84dba480ed7642904083f7d902dba39c7a0f90d5c3e605a2c3  tests/vendor-upload-button.test.cjs
+          99cc3c3603f7df01d7cb92f69394b88553df415cf708513b667a556187ae51d1  tests/vendor-visual.test.cjs
+          08e2346fc3eed68840c0de294d80299a986af6480c344705ee7a905b47859397  tests/timeline-calendar.test.cjs
+          HASHES
+      - name: Validate financial and application safeguards
+        run: |
+          node tests/payments-core.test.cjs
+          node tests/lifecycle-core.test.cjs
+          node tests/guide.test.cjs
+          node tests/navigation.test.cjs
+          node tests/budget-pdf.test.cjs
+      - name: Install dependencies and browser
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install chromium
+      - name: Validate contact, calendar and backup workflows
+        run: |
+          node tests/vendor-example-local.test.cjs
+          node tests/vendor-workflow-local.test.cjs
+          node tests/calendar-daily-local.test.cjs
+          node tests/vendor-upload-button.test.cjs
+          node tests/vendor-visual.test.cjs
+          node tests/timeline-calendar.test.cjs
+          node tests/crew-cast.test.cjs
+      - name: Commit verified source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          git add tests/vendor-upload-button.test.cjs tests/vendor-visual.test.cjs tests/timeline-calendar.test.cjs tests/crew-cast.test.cjs
+          git commit -m 'Release v1.14.0 visual timeline, contacts and upload fixes'
+          git push origin HEAD:main
+      - name: Build and publish Apple Silicon Mac release
+        run: npm run release:mac -- --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
