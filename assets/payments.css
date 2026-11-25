@@ -110,3 +110,5 @@ input[type="date"],input[type="month"]{color-scheme:light}input[type="date"]::-w
 .pm-assignment-account,.pm-assignment-sub{display:grid;gap:8px}.pm-assignment-account>h4,.pm-assignment-sub>h5{margin:4px 0}.pm-assignment-account>h4{padding:8px;background:var(--row-alt);border-radius:6px}.pm-assignment-sub{padding-left:14px}
 
 .pm-table .pm-account-row th{background:var(--row-alt);font-size:12px;color:var(--text);text-transform:none}.pm-table .pm-sub-row th{padding-left:24px;font-size:11px;color:var(--text-2);text-transform:none}
+
+.pm-day-detail-list{display:block}.pm-day-group{margin-bottom:16px}.pm-day-group h4{margin:0 0 8px}.pm-day-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
