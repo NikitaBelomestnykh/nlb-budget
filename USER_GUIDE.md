@@ -11,7 +11,7 @@ NO LONGER BUDGET keeps your original estimate, current expected cost, paid histo
 1. **Build the estimate.** Click + New Budget. Add accounts, sub-accounts and detail lines; keep different vendors on separate detail lines. Base cost is QTY × X × RATE. Apply budgeted fringes where needed.
 2. **Confirm the cost and vendor.** Open a detail line’s six-dot menu → Vendor & Payments, or click its currency sign beside Total. Choose Vendor / crew member and, if relevant, Paid through. Enter agreed base/fringe costs and click Confirm cost. Blank amounts continue to follow the budget; enter explicit amounts to hold an agreement separately.
 3. **Enter the invoice.** Click Add invoice…; enter the reference, recipient, amounts and dates, then select or upload supporting files. Review allocations before saving. An invoice records an obligation—not money paid. If a plan already covers this invoice, link that plan instead of creating a second obligation.
-4. **Plan timing when needed.** Add payment plan… supports fixed, percentage and remaining-balance installments. Use a fixed date or a production milestone with a day offset. A payment plan is optional; an invoice can carry its own due date.
+4. **Plan timing when needed.** On a detail line, choose **Schedule payment…**, enter an amount and due date, and leave the recipient as **Recipient TBD** if not yet known. This is an unpaid forecast, not a recorded payment. Later use **Edit / assign recipient** on the same plan. **Add payment plan…** also supports percentage, remaining-balance, custom splits and milestone-relative dates. An invoice can carry its own due date.
 5. **Record money actually paid.** Use Record paid for an invoice/plan, or Record payment without invoice… for a direct expense or reimbursement. Enter the real paid amount and date. Attach a receipt/payment confirmation, or explicitly choose Skip receipt for now. Add a note if useful.
 6. **Finish the evidence and returns.** Attach missing receipts later. Track an expected refund separately; record it as received only when the money comes back. Actuals update from paid amounts minus received refunds and corrections.
 7. **Close out and back up.** Review unpaid balances, receipts, expected refunds and unscheduled costs. Close completed lines, download the required reports/binder and keep an external full backup.
@@ -95,6 +95,8 @@ From a vendor dashboard, choose **Schedule payment** on a linked line, enter an 
 
 If an existing plan covers the same obligation, use **Link existing payment plan**. A blank invoice due date preserves a linked plan’s milestone timing. Do not enter the same bill as both an unrelated invoice and an extra plan.
 
+**Schedule payment…** creates a dated unpaid forecast on one detail line, even before a vendor, crew member or cast member is known. It splits base and fringe proportionally; use the advanced plan for custom splits. Assign the recipient later by editing the same plan; do not create a duplicate. A TBD plan must have a recipient assigned before it can be recorded as paid. Neither scheduling nor assignment posts an actual payment.
+
 **Add payment plan…** creates an unpaid forecast: Fixed, Percentage or Remaining balance. Unpaid percentage/balance amounts follow applicable expected costs; posted paid amounts stay fixed. Shared fixed plans split their total across lines payable to one recipient. Base and fringes may be planned together or separately. Inapplicable controls are disabled with explanations.
 
 ### Record paid, receipts and direct reimbursements
@@ -130,6 +132,8 @@ Use **Correct / reverse** for an erroneous posting, not a genuine refund. Origin
 ### Production dates, funding and cash flow
 
 Use **Edit timeline** on the production timeline to enter phase dates and opening cash. Select Custom milestone or Incoming funding beside **Add milestone**. The chart shows phase spans, custom milestones and dated funding with day/week divisions. Funding expected and received amounts/dates are distinct; an expectation does not record receipt.
+
+The production timeline groups detail lines under their accounts and marks dated payment allocations; select a marker to open its line. Calendar entries identify a recipient as TBD where applicable. Cash Flow warns about projected end-of-day shortfalls, netting same-day movements; row order is not intraday timing, and expected funding is not received cash.
 
 Unpaid milestone-relative dates move with their milestone. Fixed dates and historical paid dates stay unchanged. Cash Flow is budget-wide and includes movements on or after the opening date; earlier movements are already reflected in opening cash. Unallocated and undated costs remain Not scheduled yet. Contingency is a reserve, not invented dated spending.
 
