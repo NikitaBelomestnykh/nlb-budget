@@ -12,4 +12,6 @@ const ctx={window:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'assets/
 const protectedSource=html.slice(0,html.indexOf('  // v1.6 payment workspace')).replace(/var APP_VERSION = "[^"]+"/,'var APP_VERSION = "VERSION"');
 assert.equal(crypto.createHash('sha256').update(protectedSource).digest('hex'),fs.readFileSync(path.join(__dirname,'budget-renderer.sha256'),'utf8').trim());
 assert(html.includes('Record continued: '));assert(html.includes('totalHeight<=pageStartY-M-22'));
+assert(html.includes("!['choose-upload','vendor-upload','vendor-logo-upload'].includes(btn.dataset.pm)"),'native upload input must survive while its chooser is open');
+assert(html.includes("el.matches('[role=\"dialog\"], nav, [role=\"navigation\"]')"),'landmark labels must not show as tooltips');
 console.log('PASS navigation safety/source syntax, grouped guide, inactive support and protected budget renderer');

@@ -1,4 +1,4 @@
-# Payments, timeline and documents — v1.13.0
+# Payments, timeline and documents — v1.14.0
 
 See [the current user guide](USER_GUIDE.md) for Quick start, task guides, FAQ, closeout, backup and troubleshooting instructions. This replaces the old release-by-release instruction appendices.
 
@@ -30,3 +30,7 @@ The main Export & Share budget PDF follows the approved grey-shaded Top Sheet/de
 ## v1.13.0 vendor dashboards
 - Vendors have a visual directory and a per-vendor view for the selected budget. Link unassigned detail lines, schedule fixed dated amounts per line, record payments explicitly, and see daily unpaid totals in the vendor calendar. Advanced shared/percentage/milestone flows remain available.
 - Vendor agreements are stored locally with the reusable vendor, not in the budget document binder or ZIP. A single-budget backup includes agreement originals for referenced vendors; a workspace backup includes all vendor agreements. Originals are copied on restore. Each file may be up to 100 MB; there is no fixed number-of-agreements limit.
+
+## Crew, cast and visual timelines
+
+Crew and Cast are separate views of the shared local contact book. Choose all relevant categories when creating or editing a contact; an existing uncategorized contact remains under Vendors until categorized. Deal memos, W-9/W-2 files and other agreements stay local, with full originals in workspace backups and referenced-contact originals in single-budget backups. These backups are sensitive. The app does not process or file tax forms. Vendor logos are locally stored and backed up with contact information. Production phases and custom milestones are shown on a shared date axis; the main calendar scrolls through months without changing financial calculations.

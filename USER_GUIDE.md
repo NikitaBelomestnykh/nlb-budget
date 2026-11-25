@@ -1,4 +1,4 @@
-# NO LONGER BUDGET — User guide (v1.13.0)
+# NO LONGER BUDGET — User guide (v1.14.0)
 
 Current workflow; release history lives in GitHub and the Build Log.
 
@@ -64,6 +64,10 @@ Click the **# heading → Renumber**. Accounts renumber by hundreds within the c
 + Add subtotal sums the segment since the previous subtotal or list start, including applied fringes. The circular notes icon opens/collapses a note underneath a line without resizing the columns; it highlights when text exists. Undo/Redo applies to supported budget edits, not posted financial history.
 
 ### Setup, globals and live expressions
+
+**Crew and Cast:** In Payments & Timeline, use the Crew and Cast tabs for individual contacts. Choose one or more categories when creating or editing a contact; existing contacts stay in Vendors until categorized. A contact shared across categories is one record, with one set of locally stored agreements. Add deal memos, W-9/W-2 files and other documents from the contact dashboard. The app does not process or file tax forms. Full backups include these sensitive files; protect backup copies.
+
+**Timeline:** Production phases and custom milestones appear visually on a shared date axis. The Calendar tab scrolls through months; its month selector controls the downloaded month.
 
 **Vendor dashboard:** Choose Setup → Vendors, add a vendor, and open its dashboard. Add signed agreements (100 MB per file), link unassigned detail lines, then schedule payments on each line. The dashboard shows expected final, net paid, scheduled unpaid, unscheduled amounts and a monthly calendar with daily due totals for this budget. Vendor agreements are reusable on this computer; lines and payment records are budget-specific.
 
