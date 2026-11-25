@@ -1,0 +1,63 @@
+name: Stage and publish v1.17.0
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/stage-v117.yml]
+permissions:
+  contents: write
+concurrency:
+  group: mac-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply and verify tested source
+        run: |
+          test "$(git rev-parse HEAD^)" = b9c1f90a3420f3ee28c1961a858292bd929059c6
+          test "$(git rev-parse HEAD~2)" = cb7d76082d86a6978252197622a76a51a38f10e0
+          cat release-patches/v117-part1.patch release-patches/v117-part2.patch > /tmp/nlb-v117.patch
+          test "$(shasum -a 256 /tmp/nlb-v117.patch | cut -d' ' -f1)" = 1df4f3737b90da09a274998174c806b2069ec9f6a8530e7ee6fb702fdfb17272
+          git apply --check /tmp/nlb-v117.patch
+          git apply /tmp/nlb-v117.patch
+          rm release-patches/v117-part1.patch release-patches/v117-part2.patch
+          shasum -a 256 -c <<'HASHES'
+          bee1fb6c5586b89d77ac642a35a003105cfff2918059ddd95443b3ba7abdb994  index.html
+          f3c7b9eb66f4fe32fee0d9a3799f0ee1f5c37d894fa4f0abb4a4567645ce490d  assets/payments.css
+          a392268b3c507129d36b81752b0d55cb3877e33f1f7b9f75df24ed7dbea66eb8  package.json
+          8cc9563f6199155efa10ab27e2eac90a22a1b5ca75c19e43e0ea87da4cb98c30  tests/next-design-v117.test.cjs
+          HASHES
+      - name: Install dependencies and browser
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install chromium
+      - name: Test financial, contact and calendar workflows
+        run: |
+          for f in tests/*.test.cjs; do
+            if node "$f" > /tmp/nlb-test.log 2>&1; then cat /tmp/nlb-test.log; else
+              cat /tmp/nlb-test.log
+              msg=$(python3 -c 'from pathlib import Path; print(Path("/tmp/nlb-test.log").read_text()[-3000:].replace("%","%25").replace("\n","%0A").replace("\r","%0D"))')
+              echo "::error title=Failed test $f::$msg"
+              exit 1
+            fi
+          done
+      - name: Commit verified source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          git add tests/next-design-v117.test.cjs
+          git commit -m 'Release v1.17.0 timeline and payment editing'
+          git push origin HEAD:main
+      - name: Build and publish Apple Silicon Mac release
+        run: npm run release:mac -- --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
