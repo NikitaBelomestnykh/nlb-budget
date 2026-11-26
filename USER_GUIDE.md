@@ -95,7 +95,7 @@ From a vendor dashboard, choose **Schedule payment** on a linked line, enter an 
 
 If an existing plan covers the same obligation, use **Link existing payment plan**. A blank invoice due date preserves a linked plan’s milestone timing. Do not enter the same bill as both an unrelated invoice and an extra plan.
 
-**Schedule payment…** creates a dated unpaid forecast on one detail line, even before a vendor, crew member or cast member is known. It splits base and fringe proportionally; use the advanced plan for custom splits. Assign the recipient later by editing the same plan; do not create a duplicate. A TBD plan must have a recipient assigned before it can be recorded as paid. Neither scheduling nor assignment posts an actual payment.
+**Schedule payment…** starts a line’s payment journey. Choose Expected or Confirmed; add an expected date and, when known, a confirmed payment date. You can leave dates and the recipient TBD at first. Red means no date, yellow expected, blue confirmed, and green paid; partially paid lines are labeled. Select **This is one of multiple payments** and add each split separately. An unsplit amount override updates the forecast without changing the original budget or Actuals. Later edit the same payment to assign a recipient; do not duplicate it. A TBD plan needs a recipient before it can be recorded as paid. On the due date or when overdue it appears at the top of Payments; selecting Paid opens an explicit confirmation, not a transfer. For simple payments, enter the final actual amount (including overtime or savings) and confirm; uncheck the settle option if the amount is only a partial payment. Actuals change only after the posting. Receipt evidence may be skipped explicitly and attached later.
 
 **Add payment plan…** creates an unpaid forecast: Fixed, Percentage or Remaining balance. Unpaid percentage/balance amounts follow applicable expected costs; posted paid amounts stay fixed. Shared fixed plans split their total across lines payable to one recipient. Base and fringes may be planned together or separately. Inapplicable controls are disabled with explanations.
 
@@ -131,9 +131,9 @@ Use **Correct / reverse** for an erroneous posting, not a genuine refund. Origin
 
 ### Production dates, funding and cash flow
 
-Use **Edit timeline** on the production timeline to enter phase dates and opening cash. Select Custom milestone or Incoming funding beside **Add milestone**. The chart shows phase spans, custom milestones and dated funding with day/week divisions. Funding expected and received amounts/dates are distinct; an expectation does not record receipt.
+Use **Edit timeline** on the production timeline to enter phase dates and opening cash. Choose **Add milestone**, then select Custom milestone or Incoming funding. The chart shows phase spans, custom milestones and dated funding with day/week divisions. Funding expected and received amounts/dates are distinct; an expectation does not record receipt.
 
-The production timeline groups detail lines under their accounts and marks dated payment allocations; select a marker to open its line. Calendar entries identify a recipient as TBD where applicable. Cash Flow warns about projected end-of-day shortfalls, netting same-day movements; row order is not intraday timing, and expected funding is not received cash.
+The production timeline shows production phases, custom milestones and funding milestones; payment dates remain on the calendar. Calendar entries identify a recipient as TBD where applicable. Cash Flow warns about projected end-of-day shortfalls, netting same-day movements; row order is not intraday timing, and expected funding is not received cash.
 
 Unpaid milestone-relative dates move with their milestone. Fixed dates and historical paid dates stay unchanged. Cash Flow is budget-wide and includes movements on or after the opening date; earlier movements are already reflected in opening cash. Unallocated and undated costs remain Not scheduled yet. Contingency is a reserve, not invented dated spending.
 
