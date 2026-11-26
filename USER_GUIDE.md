@@ -1,4 +1,4 @@
-# NO LONGER BUDGET — User guide (v1.20.0)
+# NO LONGER BUDGET — User guide (v1.20.1)
 
 Current workflow; release history lives in GitHub and the Build Log.
 
@@ -129,7 +129,7 @@ The separate Expected final forecast keeps higher paid or scheduled commitments 
 
 ### Production dates, funding and cash flow
 
-Use **Edit timeline** on the production timeline to enter phase dates and opening cash. Choose **Add milestone**, then select Custom milestone or Incoming funding. The chart shows phase spans, custom milestones and dated funding with day/week divisions. Funding expected and received amounts/dates are distinct; an expectation does not record receipt.
+Use **Edit timeline** on the production timeline to enter phase dates and opening cash. Choose **Add milestone**, then select Custom milestone or Incoming funding. The chart shows phase spans, custom milestones and dated funding with day/week divisions. Hover, focus or tap a timeline bar or marker to see its dates. Funding expected and received amounts/dates are distinct; an expectation does not record receipt.
 
 The production timeline shows production phases, custom milestones and funding milestones; payment dates remain on the calendar. Calendar entries identify a recipient as TBD where applicable. Cash Flow warns about projected end-of-day shortfalls, netting same-day movements; row order is not intraday timing, and expected funding is not received cash.
 

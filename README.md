@@ -29,3 +29,7 @@ The app checks for new versions automatically in the background, and you can als
 ## Questions / issues
 
 This is an active beta — if something breaks or looks wrong, let Nikita know directly.
+
+## Design reference
+
+See [DESIGN_STYLE.md](DESIGN_STYLE.md) for the app’s shared visual conventions and review checklist.
