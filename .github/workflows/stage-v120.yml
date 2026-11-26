@@ -1,0 +1,71 @@
+name: Stage and publish v1.20.0
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/stage-v120.yml]
+permissions:
+  contents: write
+concurrency:
+  group: mac-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply and verify tested source
+        run: |
+          test "$(git rev-parse HEAD^)" = 9b410c5cb48c63048a80ab0f14cf6bacb97b6e98
+          test "$(git rev-parse HEAD~6)" = 0e1bb5144b766ae396e529570037f54a7c7a206c
+          cat release-patches/v120-*.part > /tmp/nlb-v120.patch
+          test "$(shasum -a 256 /tmp/nlb-v120.patch | cut -d' ' -f1)" = 3d18c97fb9804d6aa7fef98c2cc9a3f4674f0f6f86996b59f46ef0547ecb272a
+          git apply --check /tmp/nlb-v120.patch
+          git apply /tmp/nlb-v120.patch
+          rm release-patches/v120-*.part
+          shasum -a 256 -c <<'HASHES'
+          173400a684946524e9b1f218cb673c9e1ef5b3c33be63a2c7b603d706a022aaa  USER_GUIDE.md
+          ce902a5a828ae0d8cccbf021f24d3bb939f0abb0ebae1703292fdb4a99c6bea7  assets/guide.js
+          958eb972d82e1b3e5fb7b78b9f24e3a1fd03dfc74d32a9d2164795f5ba7c3ada  assets/payments.css
+          1ace2e038710a446eb22b55462c18497adbbd1e9db66fde5f4f0b2ce7a865a6b  index.html
+          f20645066f5126399ccd5a9e5cc6258954c5dabca48b11f8a37de6ab3234dcee  package.json
+          a24a471ca96d6a9b05527942f7d3df52d7a7bc845670fd2f11f45e22089d7841  tests/budget-renderer.sha256
+          63a2e07e42569941b9bd9e8dc55060d201fd17ac656b7f4d982ee80686bf7f89  tests/contact-edit-v115.test.cjs
+          714c3c0b3829508acd542ed22e8d3bdfd77179f4f653c3c05f26a961f21f07e8  tests/grouping-v1161.test.cjs
+          07b7171e1759467634976dbdc49ce2c7f8d737375406341dbc6efa0a0eff6db8  tests/navigation.test.cjs
+          0e4f1d6331875b11947b5a18375a41ce153106d58f08550507e2800b5515cbef  tests/next-design-v117.test.cjs
+          8f4abdd8ada0cc1e0cfa3196ef1dfd08233ea51d422d2cd8c82313452d884c25  tests/payment-details-v120.test.cjs
+          5bd6ff9271402e7108437c9122d08d127bee6d4e318898021633898ddee5420b  tests/payment-journey-v119.test.cjs
+          HASHES
+      - name: Install dependencies and browser
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install chromium
+      - name: Test financial, contact and calendar workflows
+        run: |
+          for f in tests/*.test.cjs; do
+            if node "$f" > /tmp/nlb-test.log 2>&1; then cat /tmp/nlb-test.log; else
+              cat /tmp/nlb-test.log
+              msg=$(python3 -c 'from pathlib import Path; print(Path("/tmp/nlb-test.log").read_text()[-3000:].replace("%","%25").replace("\n","%0A").replace("\r","%0D"))')
+              echo "::error title=Failed test $f::$msg"
+              exit 1
+            fi
+          done
+      - name: Commit verified source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          git add tests/payment-details-v120.test.cjs
+          git commit -m 'Release v1.20.0 payment details and scheduling'
+          git push origin HEAD:main
+      - name: Build and publish Apple Silicon Mac release
+        run: npm run release:mac -- --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
