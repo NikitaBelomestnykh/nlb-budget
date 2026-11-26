@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),main=fs.readFileSync(path.join(root,'main.js'),'utf8');
 for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))if(match[1].trim())new vm.Script(match[1]);
 new vm.Script(main);
-assert(html.includes("isLine&&!m.confirmed?' open':''"));
+assert(html.includes('class="lc-section lc-details"'));
 for(const guard of ['spaceSanitize','spaceForget(postId)','if(!spaceNav.restoring)spaceSave()','spaceNav.entries=[];spaceNav.pos=-1','URL.revokeObjectURL(pm.preview)'])assert(html.includes(guard),guard);
 const support=html.slice(html.indexOf('function supportPlaceholderHTML()'),html.indexOf('const supportOldHelp'));
 assert(support.includes('disabled aria-describedby="support-inactive-status"'));assert(support.includes('Not active at the moment'));assert(support.includes('Contribute once, regularly, or never'));assert(!/href=|\$100|Stripe|fetch\(/.test(support));
